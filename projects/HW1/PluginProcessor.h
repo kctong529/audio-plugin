@@ -71,4 +71,6 @@ private:
     float modulationPhase = 0.0f;
     float modulationFreqHz = 30.0f; // default in Hz
     double currentSampleRate = 44100.0;
+    bool isEnabled = true;
+
 };

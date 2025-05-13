@@ -20,7 +20,9 @@ MainProcessor::MainProcessor() :
     [this] (float value, bool /*forced*/)
     {
         DBG(Param::Name::Enabled + ": " + juce::String { value });
-        filter.setEnabled(value > 0.5f);
+        isEnabled = (value > 0.5f);
+
+        filter.setEnabled(isEnabled);
     });
 
     parameterManager.registerParameterCallback(Param::ID::Drive,
@@ -100,22 +102,26 @@ void MainProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuf
     const int numChannels = buffer.getNumChannels();
     const int numSamples = buffer.getNumSamples();
 
-    for(int sample = 0; sample < numSamples; ++sample){
-        float modSignal = std::cos(modulationPhase);
-        modulationPhase += 2.0f * juce::MathConstants<float>::pi * modFreq / currentSampleRate;
-        
-        // Wrap phase to avoid precision issues
-        if (modulationPhase > juce::MathConstants<float>::twoPi)
-            modulationPhase -= juce::MathConstants<float>::twoPi;
+    if(isEnabled){
+        for(int sample = 0; sample < numSamples; ++sample){
+            float modSignal = std::cos(modulationPhase);
+            modulationPhase += 2.0f * juce::MathConstants<float>::pi * modFreq / currentSampleRate;
+            
+            // Wrap phase to avoid precision issues
+            if (modulationPhase > juce::MathConstants<float>::twoPi)
+                modulationPhase -= juce::MathConstants<float>::twoPi;
 
-        // Apply ring modulation to each channel
-        for (int ch = 0; ch < numChannels; ++ch)
-        {
-            float* channelData = buffer.getWritePointer(ch);
-            channelData[sample] *= modSignal;
+            // Apply ring modulation to each channel
+            for (int ch = 0; ch < numChannels; ++ch)
+            {
+                float* channelData = buffer.getWritePointer(ch);
+                channelData[sample] *= modSignal;
+            }
+
         }
-
     }
+
+
 
     // {
     //     juce::dsp::AudioBlock<float> audioBlock(buffer.getArrayOfWritePointers(), buffer.getNumChannels(), buffer.getNumSamples());
