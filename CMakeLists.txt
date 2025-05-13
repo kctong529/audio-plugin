@@ -143,3 +143,17 @@ add_plugin(mfrtaa
         ${mfrtaa_source}/PluginProcessor.cpp
     INCLUDE_DIRS
         ${mfrtaa_source})
+
+set(hw1_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/HW1)
+
+add_plugin(HW1
+    VERSION 0.1.0
+    PLUGIN_NAME "Homework 1"
+    PROD_NAME Homework1
+    PROD_CODE Hw_1
+    SYNTH TRUE
+    SOURCES
+        ${hw1_source}/PluginEditor.cpp
+        ${hw1_source}/PluginProcessor.cpp
+    INCLUDE_DIRS
+        ${hw1_source})
