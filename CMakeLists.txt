@@ -45,6 +45,7 @@ set(company_copyright "Modern Real-Time Audio Oy")
 set(company_code "Mrta")
 set(company_bundle_id "com.ModernRealTimeAudio")
 
+
 # This function adds a JUCE plugin target to this project
 # Arguments:
 #   - TARGET: The name of your plugin target, this allows you to identify which of your plugins will be built.
@@ -73,6 +74,8 @@ function(add_plugin target)
     #message(STATUS "  INCLUDE_DIRS: ${AP_INCLUDE_DIRS}")
 
     # Add juce plugin target
+    set(AP_PLUGIN_NAME "RingModulator")  # Set this to your plugin's name
+    message(STATUS "PLUGIN_NAME: ${AP_PLUGIN_NAME}")  # This will show the plugin name in the terminal
     juce_add_plugin(${target}
         PRODUCT_NAME ${AP_PROD_NAME}
         VERSION ${AP_VERSION}

@@ -65,7 +65,7 @@ MainProcessor::MainProcessor() :
             outputGain.setTargetValue(dbValue);
     });
 
-    parameterManager.registerParameterCallback(Param::ID:ModulationFreq, 
+    parameterManager.registerParameterCallback(Param::ID::ModulationFreq, 
     [this](float value, bool /*forced*/) 
     {
         DBG(Param::Name::ModulationFreq + juce::String(value));
