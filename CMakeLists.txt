@@ -82,15 +82,18 @@ function(add_plugin target)
         MICROPHONE_PERMISSION_ENABLED TRUE
         COMPANY_COPYRIGHT ${company_copyright}
         COMPANY_NAME ${company_name}
-        FORMATS Standalone VST3 AU Standalone
+        FORMATS VST3 AU Standalone
         PLUGIN_NAME ${AP_PLUGIN_NAME}
         PLUGIN_MANUFACTURER_CODE ${company_code}
         PLUGIN_CODE ${AP_PROD_CODE}
         BUNDLE_ID ${company_bundle_id}.${AP_PROD_NAME}
-        IS_SYNTH ${AP_SYNTH}
-        NEEDS_MIDI_INPUT ${AP_SYNTH}
+        IS_SYNTH FALSE
+        NEEDS_MIDI_INPUT FALSE
         NEEDS_MIDI_OUTPUT FALSE
-        COPY_PLUGIN_AFTER_BUILD TRUE)
+        COPY_PLUGIN_AFTER_BUILD TRUE
+        
+        PLUGIN_CHANNEL_CONFIGURATIONS "2-2"
+    )
     juce_generate_juce_header(${target})
 
     target_sources(${target}

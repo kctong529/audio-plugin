@@ -148,7 +148,7 @@ juce::AudioProcessorEditor* MainProcessor::createEditor()
 }
 
 //==============================================================================
-const juce::String MainProcessor::getName() const { return JucePlugin_Name; }
+const juce::String MainProcessor::getName() const { return "Homework1"; }
 bool MainProcessor::acceptsMidi() const { return false; }
 bool MainProcessor::producesMidi() const { return false; }
 bool MainProcessor::isMidiEffect() const { return false; }
