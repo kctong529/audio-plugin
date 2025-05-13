@@ -123,11 +123,12 @@ void MainProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuf
 
 
 
-    // {
-    //     juce::dsp::AudioBlock<float> audioBlock(buffer.getArrayOfWritePointers(), buffer.getNumChannels(), buffer.getNumSamples());
-    //     juce::dsp::ProcessContextReplacing<float> ctx(audioBlock);
-    //     filter.process(ctx);
-    // }
+    
+    juce::dsp::AudioBlock<float> audioBlock(buffer.getArrayOfWritePointers(), buffer.getNumChannels(), buffer.getNumSamples());
+    //juce::dsp::AudioBlock<float> audioBlock(buffer);
+    juce::dsp::ProcessContextReplacing<float> ctx(audioBlock);
+    filter.process(ctx);
+    
 
     //outputGain.applyGain(buffer, buffer.getNumSamples());
     outputGain.applyGain(buffer, numSamples);
