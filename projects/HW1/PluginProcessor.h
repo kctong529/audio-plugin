@@ -72,5 +72,12 @@ private:
     float modulationFreqHz = 30.0f; // default in Hz
     double currentSampleRate = 44100.0;
     bool isEnabled = true;
+    float diodeSaturationAmount = 1.5f;
+
+    juce::dsp::ProcessorDuplicator<
+        juce::dsp::IIR::Filter<float>,
+        juce::dsp::IIR::Coefficients<float>
+    > dcBlocker;
+
 
 };

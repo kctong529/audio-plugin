@@ -90,6 +90,11 @@ void MainProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
     modulationPhase = 0.0;
 
     parameterManager.updateParameters(true);
+
+    juce::dsp::ProcessSpec spec { sampleRate, static_cast<juce::uint32>(samplesPerBlock), static_cast<juce::uint32>(numChannels) };
+    dcBlocker.prepare(spec);
+    dcBlocker.state = juce::dsp::IIR::Coefficients<float>::makeHighPass(sampleRate, 20.0f);  // 20 Hz cutoff
+
 }
 
 void MainProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& /*midiMessages*/)
@@ -101,6 +106,11 @@ void MainProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuf
 
     const int numChannels = buffer.getNumChannels();
     const int numSamples = buffer.getNumSamples();
+
+    //juce::dsp::AudioBlock<float> audioBlock(buffer.getArrayOfWritePointers(), buffer.getNumChannels(), buffer.getNumSamples());
+    juce::dsp::AudioBlock<float> audioBlock(buffer);
+    juce::dsp::ProcessContextReplacing<float> ctx(audioBlock);
+    filter.process(ctx);
 
     if(isEnabled){
         for(int sample = 0; sample < numSamples; ++sample){
@@ -115,20 +125,23 @@ void MainProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuf
             for (int ch = 0; ch < numChannels; ++ch)
             {
                 float* channelData = buffer.getWritePointer(ch);
-                channelData[sample] *= modSignal;
+                //channelData[sample] *= modSignal;
+                float inSample = channelData[sample];
+
+                float diodeMod =
+                    std::tanh(diodeSaturationAmount * (inSample + modSignal)) -
+                    std::tanh(diodeSaturationAmount * (inSample - modSignal));
+
+                channelData[sample] = diodeMod;
             }
 
         }
     }
-
-
-
     
-    juce::dsp::AudioBlock<float> audioBlock(buffer.getArrayOfWritePointers(), buffer.getNumChannels(), buffer.getNumSamples());
-    //juce::dsp::AudioBlock<float> audioBlock(buffer);
-    juce::dsp::ProcessContextReplacing<float> ctx(audioBlock);
-    filter.process(ctx);
-    
+
+    juce::dsp::AudioBlock<float> block(buffer);
+    juce::dsp::ProcessContextReplacing<float> dcCtx(block);
+    dcBlocker.process(dcCtx);
 
     //outputGain.applyGain(buffer, buffer.getNumSamples());
     outputGain.applyGain(buffer, numSamples);
