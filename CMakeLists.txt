@@ -45,6 +45,7 @@ set(company_copyright "Modern Real-Time Audio Oy")
 set(company_code "Mrta")
 set(company_bundle_id "com.ModernRealTimeAudio")
 
+
 # This function adds a JUCE plugin target to this project
 # Arguments:
 #   - TARGET: The name of your plugin target, this allows you to identify which of your plugins will be built.
@@ -73,21 +74,26 @@ function(add_plugin target)
     #message(STATUS "  INCLUDE_DIRS: ${AP_INCLUDE_DIRS}")
 
     # Add juce plugin target
+    set(AP_PLUGIN_NAME "RingModulator")  # Set this to your plugin's name
+    message(STATUS "PLUGIN_NAME: ${AP_PLUGIN_NAME}")  # This will show the plugin name in the terminal
     juce_add_plugin(${target}
         PRODUCT_NAME ${AP_PROD_NAME}
         VERSION ${AP_VERSION}
         MICROPHONE_PERMISSION_ENABLED TRUE
         COMPANY_COPYRIGHT ${company_copyright}
         COMPANY_NAME ${company_name}
-        FORMATS Standalone VST3 AU Standalone
+        FORMATS VST3 AU Standalone
         PLUGIN_NAME ${AP_PLUGIN_NAME}
         PLUGIN_MANUFACTURER_CODE ${company_code}
         PLUGIN_CODE ${AP_PROD_CODE}
         BUNDLE_ID ${company_bundle_id}.${AP_PROD_NAME}
-        IS_SYNTH ${AP_SYNTH}
-        NEEDS_MIDI_INPUT ${AP_SYNTH}
+        IS_SYNTH FALSE
+        NEEDS_MIDI_INPUT FALSE
         NEEDS_MIDI_OUTPUT FALSE
-        COPY_PLUGIN_AFTER_BUILD TRUE)
+        COPY_PLUGIN_AFTER_BUILD TRUE
+        
+        PLUGIN_CHANNEL_CONFIGURATIONS "2-2"
+    )
     juce_generate_juce_header(${target})
 
     target_sources(${target}
@@ -144,17 +150,16 @@ add_plugin(mfrtaa
     INCLUDE_DIRS
         ${mfrtaa_source})
 
-# add ring modulator project
-set(ringmod_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/RingModulator)
+set(hw1_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/HW1)
 
-add_plugin(ringmod
+add_plugin(HW1
     VERSION 0.1.0
-    PLUGIN_NAME "Ring Modulator App"
-    PROD_NAME RingModulator
-    PROD_CODE Rtap
-    SYNTH FALSE
+    PLUGIN_NAME "Homework 1"
+    PROD_NAME Homework1
+    PROD_CODE Hw_1
+    SYNTH TRUE
     SOURCES
-        ${ringmod_source}/PluginEditor.cpp
-        ${ringmod_source}/PluginProcessor.cpp
+        ${hw1_source}/PluginEditor.cpp
+        ${hw1_source}/PluginProcessor.cpp
     INCLUDE_DIRS
-        ${ringmod_source})
+        ${hw1_source})
