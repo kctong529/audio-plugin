@@ -217,3 +217,17 @@ add_plugin(flanger
     INCLUDE_DIRS
         ${dsp_source}
         ${flanger_source})
+
+set(hw2_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/HW2)
+
+add_plugin(HW2
+    VERSION 0.1.0
+    PLUGIN_NAME "Homework 2"
+    PROD_NAME Homework2
+    PROD_CODE Hw_2
+    SYNTH TRUE
+    SOURCES
+        ${hw2_source}/PluginEditor.cpp
+        ${hw2_source}/PluginProcessor.cpp
+    INCLUDE_DIRS
+        ${hw2_source})
