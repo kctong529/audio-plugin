@@ -150,16 +150,56 @@ add_plugin(mfrtaa
     INCLUDE_DIRS
         ${mfrtaa_source})
 
-set(hw1_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/HW1)
+# ring mod project
+set(ringmod_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/RingModulator)
 
-add_plugin(HW1
+add_plugin(ringmod
     VERSION 0.1.0
-    PLUGIN_NAME "Homework 1"
-    PROD_NAME Homework1
-    PROD_CODE Hw_1
-    SYNTH TRUE
+    PLUGIN_NAME "Ring Modulator"
+    PROD_NAME RingModulator
+    PROD_CODE Rmod
+    SYNTH FALSE
     SOURCES
-        ${hw1_source}/PluginEditor.cpp
-        ${hw1_source}/PluginProcessor.cpp
+        ${ringmod_source}/PluginEditor.cpp
+        ${ringmod_source}/PluginProcessor.cpp
+        ${dsp_source}/RingMod.cpp
     INCLUDE_DIRS
-        ${hw1_source})
+        ${dsp_source}
+        ${ringmod_source})
+
+# parametric eq project
+set(parameq_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/ParametricEQ)
+
+add_plugin(parameq
+    VERSION 0.1.0
+    PLUGIN_NAME "Parametric EQ"
+    PROD_NAME ParametricEQ
+    PROD_CODE Pmeq
+    SYNTH FALSE
+    SOURCES
+        ${parameq_source}/PluginEditor.cpp
+        ${parameq_source}/PluginProcessor.cpp
+        ${dsp_source}/Biquad.cpp
+        ${dsp_source}/ParametricEqualizer.cpp
+    INCLUDE_DIRS
+        ${gui_source}
+        ${dsp_source}
+        ${ringmod_source})
+
+# flanger project
+set(flanger_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/Flanger)
+
+add_plugin(flanger
+    VERSION 0.1.0
+    PLUGIN_NAME "Flanger"
+    PROD_NAME Flanger
+    PROD_CODE Flng
+    SYNTH FALSE
+    SOURCES
+        ${flanger_source}/PluginEditor.cpp
+        ${flanger_source}/PluginProcessor.cpp
+        ${dsp_source}/DelayLine.cpp
+        ${dsp_source}/Flanger.cpp
+    INCLUDE_DIRS
+        ${dsp_source}
+        ${flanger_source})
