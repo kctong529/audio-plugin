@@ -27,11 +27,6 @@ if (WIN32)
     set(windows_defines _USE_MATH_DEFINES WIN32_LEAN_AND_MEAN)
 endif()
 
-# Some Linux specific defines (libcurl does not link for whatever reason)
-if (LINUX)
-    set(linux_defines JUCE_USE_CURL=0 JUCE_JACK=1)
-endif()
-
 # Add JUCE
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dependencies/JUCE)
 
@@ -44,7 +39,6 @@ set(company_name "Modern Real-Time Audio")
 set(company_copyright "Modern Real-Time Audio Oy")
 set(company_code "Mrta")
 set(company_bundle_id "com.ModernRealTimeAudio")
-
 
 # This function adds a JUCE plugin target to this project
 # Arguments:
@@ -74,26 +68,21 @@ function(add_plugin target)
     #message(STATUS "  INCLUDE_DIRS: ${AP_INCLUDE_DIRS}")
 
     # Add juce plugin target
-    set(AP_PLUGIN_NAME "RingModulator")  # Set this to your plugin's name
-    message(STATUS "PLUGIN_NAME: ${AP_PLUGIN_NAME}")  # This will show the plugin name in the terminal
     juce_add_plugin(${target}
         PRODUCT_NAME ${AP_PROD_NAME}
         VERSION ${AP_VERSION}
         MICROPHONE_PERMISSION_ENABLED TRUE
         COMPANY_COPYRIGHT ${company_copyright}
         COMPANY_NAME ${company_name}
-        FORMATS VST3 AU Standalone
+        FORMATS Standalone VST3 AU Standalone
         PLUGIN_NAME ${AP_PLUGIN_NAME}
         PLUGIN_MANUFACTURER_CODE ${company_code}
         PLUGIN_CODE ${AP_PROD_CODE}
         BUNDLE_ID ${company_bundle_id}.${AP_PROD_NAME}
-        IS_SYNTH FALSE
-        NEEDS_MIDI_INPUT FALSE
+        IS_SYNTH ${AP_SYNTH}
+        NEEDS_MIDI_INPUT ${AP_SYNTH}
         NEEDS_MIDI_OUTPUT FALSE
-        COPY_PLUGIN_AFTER_BUILD TRUE
-        
-        PLUGIN_CHANNEL_CONFIGURATIONS "2-2"
-    )
+        COPY_PLUGIN_AFTER_BUILD TRUE)
     juce_generate_juce_header(${target})
 
     target_sources(${target}
@@ -114,8 +103,7 @@ function(add_plugin target)
             JUCE_ASIO=1 JUCE_DIRECTSOUND=0 JUCE_USE_FLAC=0 JUCE_USE_OGGVORBIS=0
             JUCE_USE_WINDOWS_MEDIA_FORMAT=0 JUCE_WEB_BROWSER=0
             JUCE_VST3_CAN_REPLACE_VST2=0 JUCE_SILENCE_XCODE_15_LINKER_WARNING=1
-            ${windows_defines}
-            ${linux_defines})
+            ${windows_defines})
 
     target_link_libraries(${target}
         PRIVATE
@@ -150,19 +138,6 @@ add_plugin(mfrtaa
     INCLUDE_DIRS
         ${mfrtaa_source})
 
-set(hw1_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/HW1)
-
-add_plugin(HW1
-    VERSION 0.1.0
-    PLUGIN_NAME "Homework 1"
-    PROD_NAME Homework1
-    PROD_CODE Hw_1
-    SYNTH TRUE
-    SOURCES
-        ${hw1_source}/PluginEditor.cpp
-        ${hw1_source}/PluginProcessor.cpp
-    INCLUDE_DIRS
-        ${hw1_source})
 
 # ring mod project
 set(ringmod_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/RingModulator)
@@ -195,6 +170,7 @@ add_plugin(parameq
         ${parameq_source}/PluginProcessor.cpp
         ${dsp_source}/Biquad.cpp
         ${dsp_source}/ParametricEqualizer.cpp
+        ${gui_source}/MrtaLAF.cpp
     INCLUDE_DIRS
         ${gui_source}
         ${dsp_source}
@@ -234,6 +210,8 @@ add_plugin(delay
         ${dsp_source}/Delay.cpp
         ${dsp_source}/Biquad.cpp
         ${dsp_source}/ParametricEqualizer.cpp
+        ${dsp_source}/Meter.cpp
+        ${gui_source}/MeterComponent.cpp
     INCLUDE_DIRS
         ${dsp_source}
         ${gui_source}
@@ -308,17 +286,3 @@ add_plugin(svf
     INCLUDE_DIRS
         ${dsp_source}
         ${svf_source})
-
-set(hw2_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/HW2)
-
-add_plugin(HW2
-    VERSION 0.1.0
-    PLUGIN_NAME "Homework 2"
-    PROD_NAME Homework2
-    PROD_CODE Hw_2
-    SYNTH TRUE
-    SOURCES
-        ${hw2_source}/PluginEditor.cpp
-        ${hw2_source}/PluginProcessor.cpp
-    INCLUDE_DIRS
-        ${hw2_source})
