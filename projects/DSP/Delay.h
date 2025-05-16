@@ -72,6 +72,7 @@ private:
 
     static constexpr float WowFreqHz { 2.f };
     static constexpr float WowDepthMax { 0.002f };
+    static constexpr float MaxChannels { 2 };
 };
 
 }

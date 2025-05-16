@@ -67,7 +67,7 @@ namespace Param
     {
         static const juce::String Ms { "ms" };
         static const juce::String Hz { "Hz" };
-        static const juce::String dB { "Hz" };
+        static const juce::String dB { "dB" };
     }
 }
 
