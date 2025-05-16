@@ -27,11 +27,6 @@ if (WIN32)
     set(windows_defines _USE_MATH_DEFINES WIN32_LEAN_AND_MEAN)
 endif()
 
-# Some Linux specific defines (libcurl does not link for whatever reason)
-if (LINUX)
-    set(linux_defines JUCE_USE_CURL=0 JUCE_JACK=1)
-endif()
-
 # Add JUCE
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dependencies/JUCE)
 
@@ -108,8 +103,7 @@ function(add_plugin target)
             JUCE_ASIO=1 JUCE_DIRECTSOUND=0 JUCE_USE_FLAC=0 JUCE_USE_OGGVORBIS=0
             JUCE_USE_WINDOWS_MEDIA_FORMAT=0 JUCE_WEB_BROWSER=0
             JUCE_VST3_CAN_REPLACE_VST2=0 JUCE_SILENCE_XCODE_15_LINKER_WARNING=1
-            ${windows_defines}
-            ${linux_defines})
+            ${windows_defines})
 
     target_link_libraries(${target}
         PRIVATE
@@ -144,6 +138,7 @@ add_plugin(mfrtaa
     INCLUDE_DIRS
         ${mfrtaa_source})
 
+
 # ring mod project
 set(ringmod_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/RingModulator)
 
@@ -175,6 +170,7 @@ add_plugin(parameq
         ${parameq_source}/PluginProcessor.cpp
         ${dsp_source}/Biquad.cpp
         ${dsp_source}/ParametricEqualizer.cpp
+        ${gui_source}/MrtaLAF.cpp
     INCLUDE_DIRS
         ${gui_source}
         ${dsp_source}
@@ -214,6 +210,8 @@ add_plugin(delay
         ${dsp_source}/Delay.cpp
         ${dsp_source}/Biquad.cpp
         ${dsp_source}/ParametricEqualizer.cpp
+        ${dsp_source}/Meter.cpp
+        ${gui_source}/MeterComponent.cpp
     INCLUDE_DIRS
         ${dsp_source}
         ${gui_source}

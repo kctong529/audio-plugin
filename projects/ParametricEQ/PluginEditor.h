@@ -14,7 +14,7 @@ public:
 
     static const int BandWidth { 250 };
     static const int ParamHeight { 80 };
-    static const int ParamsPerBand { 5 };
+    static const int ParamsPerBand { 4 };
     static const int NumOfBands { 3 };
 
 private:
