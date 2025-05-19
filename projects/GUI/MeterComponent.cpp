@@ -24,14 +24,17 @@ void MeterComponent::paint(juce::Graphics& g)
     float leftEnvelope = meter.getEnvelope(0);
     float leftEnvelopeDb = 20.f * std::log10(std::fmax(leftEnvelope, 1e-6));
 
-    float rightEnvelope = meter.getEnvelope(0);
-    float rightEnvelopeDb = 20.f * std::log10(std::fmax(rightEnvelope, 1e-6));
+    float rightEnvelope = leftEnvelope;
+    float rightEnvelopeDb = leftEnvelopeDb;
 
     juce::Rectangle<int> totalArea = getLocalBounds();
     juce::Rectangle<int> leftChannelArea;
     juce::Rectangle<int> rightChannelArea;
     if (numChannels > 1)
     {
+        rightEnvelope = meter.getEnvelope(1);
+        rightEnvelopeDb = 20.f * std::log10(std::fmax(rightEnvelope, 1e-6));
+
         leftChannelArea = totalArea.removeFromLeft(getWidth() / 2);
         rightChannelArea = totalArea;
 

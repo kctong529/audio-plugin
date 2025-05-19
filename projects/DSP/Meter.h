@@ -30,6 +30,7 @@ public:
 
     void setTimeConstant(float releaseTimeMs);
 
+    // Will be called from the GUI to get the current envelope value
     float getEnvelope(unsigned int channel) const;
 
     unsigned int getNumChannels() const;

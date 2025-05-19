@@ -65,11 +65,12 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int sta
         ramp.prepare(sampleRate);
     }
 
+    auto* outputPtr = outputBuffer.getWritePointer(0, startSample);
+
     // process the oscillator
-    osc.process(outputBuffer.getWritePointer(0, startSample), static_cast<unsigned int>(numSamples));
+    osc.process(outputPtr, static_cast<unsigned int>(numSamples));
 
     // apply simple ramp as VCA
-    auto* outputPtr = outputBuffer.getWritePointer(0, startSample);
     ramp.applyGain(&outputPtr, 1u, static_cast<unsigned int>(numSamples));
 
     // if the output is stereo, just copy contents from left to right channel

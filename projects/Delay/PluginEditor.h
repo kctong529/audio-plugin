@@ -2,6 +2,7 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
+#include "MeterComponent.h"
 
 class DelayAudioProcessorEditor  : public juce::AudioProcessorEditor
 {
@@ -17,6 +18,7 @@ public:
 private:
     DelayAudioProcessor& audioProcessor;
     mrta::GenericParameterEditor genericParameterEditor;
+    GUI::MeterComponent meterComponent;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DelayAudioProcessorEditor)
 };
