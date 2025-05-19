@@ -23,6 +23,7 @@ public:
 
 private:
     DSP::Meter& meter;
+    juce::ColourGradient grad;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MeterComponent)
 };

@@ -15,6 +15,8 @@ MeterComponent::~MeterComponent()
 
 void MeterComponent::resized()
 {
+    auto bounds = getLocalBounds();
+    grad = juce::ColourGradient::vertical(juce::Colours::yellow, juce::Colours::green, bounds);
 }
 
 void MeterComponent::paint(juce::Graphics& g)
@@ -46,8 +48,16 @@ void MeterComponent::paint(juce::Graphics& g)
         juce::Rectangle<float> rightProp(0.f, 1.f - rightFillPropHeight,
                                          1.f, rightFillPropHeight);
 
-        g.setColour(juce::Colours::green);
+        if (leftEnvelopeDb >= 0.f)
+            g.setColour(juce::Colours::red);
+        else
+            g.setGradientFill(grad);
         g.fillRect(leftChannelArea.getProportion(leftProp));
+
+        if (rightEnvelopeDb >= 0.f)
+            g.setColour(juce::Colours::red);
+        else
+            g.setGradientFill(grad);
         g.fillRect(rightChannelArea.getProportion(rightProp));
     }
     else

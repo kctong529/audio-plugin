@@ -12,11 +12,13 @@ DelayAudioProcessorEditor::DelayAudioProcessorEditor(DelayAudioProcessor& p) :
 
     addAndMakeVisible(meterComponent);
     addAndMakeVisible(genericParameterEditor);
+    genericParameterEditor.setLookAndFeel(&laf);
     setSize(300 + METER_WIDTH, numParams * paramHeight);
 }
 
 DelayAudioProcessorEditor::~DelayAudioProcessorEditor()
 {
+    genericParameterEditor.setLookAndFeel(nullptr);
 }
 
 void DelayAudioProcessorEditor::paint (juce::Graphics& g)
