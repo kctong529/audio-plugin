@@ -135,194 +135,218 @@ endfunction(add_plugin)
 set(dsp_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/DSP)
 set(gui_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/GUI)
 
-# add example project
-set(mfrtaa_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/MyFirstRealTimeAudioApp)
+# # add example project
+# set(mfrtaa_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/MyFirstRealTimeAudioApp)
 
-add_plugin(mfrtaa
-    VERSION 0.1.0
-    PLUGIN_NAME "My First RT Audio App"
-    PROD_NAME MyFirstRTAudioApp
-    PROD_CODE Rtap
-    SYNTH FALSE
-    SOURCES
-        ${mfrtaa_source}/PluginEditor.cpp
-        ${mfrtaa_source}/PluginProcessor.cpp
-    INCLUDE_DIRS
-        ${mfrtaa_source})
+# add_plugin(mfrtaa
+#     VERSION 0.1.0
+#     PLUGIN_NAME "My First RT Audio App"
+#     PROD_NAME MyFirstRTAudioApp
+#     PROD_CODE Rtap
+#     SYNTH FALSE
+#     SOURCES
+#         ${mfrtaa_source}/PluginEditor.cpp
+#         ${mfrtaa_source}/PluginProcessor.cpp
+#     INCLUDE_DIRS
+#         ${mfrtaa_source})
 
-set(hw1_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/HW1)
+# set(hw1_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/HW1)
 
-add_plugin(HW1
-    VERSION 0.1.0
-    PLUGIN_NAME "Homework 1"
-    PROD_NAME Homework1
-    PROD_CODE Hw_1
-    SYNTH TRUE
-    SOURCES
-        ${hw1_source}/PluginEditor.cpp
-        ${hw1_source}/PluginProcessor.cpp
-    INCLUDE_DIRS
-        ${hw1_source})
+# add_plugin(HW1
+#     VERSION 0.1.0
+#     PLUGIN_NAME "Homework 1"
+#     PROD_NAME Homework1
+#     PROD_CODE Hw_1
+#     SYNTH TRUE
+#     SOURCES
+#         ${hw1_source}/PluginEditor.cpp
+#         ${hw1_source}/PluginProcessor.cpp
+#     INCLUDE_DIRS
+#         ${hw1_source})
 
-# ring mod project
-set(ringmod_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/RingModulator)
+# # ring mod project
+# set(ringmod_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/RingModulator)
 
-add_plugin(ringmod
-    VERSION 0.1.0
-    PLUGIN_NAME "Ring Modulator"
-    PROD_NAME RingModulator
-    PROD_CODE Rmod
-    SYNTH FALSE
-    SOURCES
-        ${ringmod_source}/PluginEditor.cpp
-        ${ringmod_source}/PluginProcessor.cpp
-        ${dsp_source}/RingMod.cpp
-    INCLUDE_DIRS
-        ${dsp_source}
-        ${ringmod_source})
+# add_plugin(ringmod
+#     VERSION 0.1.0
+#     PLUGIN_NAME "Ring Modulator"
+#     PROD_NAME RingModulator
+#     PROD_CODE Rmod
+#     SYNTH FALSE
+#     SOURCES
+#         ${ringmod_source}/PluginEditor.cpp
+#         ${ringmod_source}/PluginProcessor.cpp
+#         ${dsp_source}/RingMod.cpp
+#     INCLUDE_DIRS
+#         ${dsp_source}
+#         ${ringmod_source})
 
-# parametric eq project
-set(parameq_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/ParametricEQ)
+# # parametric eq project
+# set(parameq_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/ParametricEQ)
 
-add_plugin(parameq
-    VERSION 0.1.0
-    PLUGIN_NAME "Parametric EQ"
-    PROD_NAME ParametricEQ
-    PROD_CODE Pmeq
-    SYNTH FALSE
-    SOURCES
-        ${parameq_source}/PluginEditor.cpp
-        ${parameq_source}/PluginProcessor.cpp
-        ${dsp_source}/Biquad.cpp
-        ${dsp_source}/ParametricEqualizer.cpp
-        ${gui_source}/MrtaLAF.cpp
-    INCLUDE_DIRS
-        ${gui_source}
-        ${dsp_source}
-        ${ringmod_source})
+# add_plugin(parameq
+#     VERSION 0.1.0
+#     PLUGIN_NAME "Parametric EQ"
+#     PROD_NAME ParametricEQ
+#     PROD_CODE Pmeq
+#     SYNTH FALSE
+#     SOURCES
+#         ${parameq_source}/PluginEditor.cpp
+#         ${parameq_source}/PluginProcessor.cpp
+#         ${dsp_source}/Biquad.cpp
+#         ${dsp_source}/ParametricEqualizer.cpp
+#         ${gui_source}/MrtaLAF.cpp
+#     INCLUDE_DIRS
+#         ${gui_source}
+#         ${dsp_source}
+#         ${ringmod_source})
 
-# flanger project
-set(flanger_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/Flanger)
+# # flanger project
+# set(flanger_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/Flanger)
 
-add_plugin(flanger
-    VERSION 0.1.0
-    PLUGIN_NAME "Flanger"
-    PROD_NAME Flanger
-    PROD_CODE Flng
-    SYNTH FALSE
-    SOURCES
-        ${flanger_source}/PluginEditor.cpp
-        ${flanger_source}/PluginProcessor.cpp
-        ${dsp_source}/DelayLine.cpp
-        ${dsp_source}/Flanger.cpp
-    INCLUDE_DIRS
-        ${dsp_source}
-        ${flanger_source})
+# add_plugin(flanger
+#     VERSION 0.1.0
+#     PLUGIN_NAME "Flanger"
+#     PROD_NAME Flanger
+#     PROD_CODE Flng
+#     SYNTH FALSE
+#     SOURCES
+#         ${flanger_source}/PluginEditor.cpp
+#         ${flanger_source}/PluginProcessor.cpp
+#         ${dsp_source}/DelayLine.cpp
+#         ${dsp_source}/Flanger.cpp
+#     INCLUDE_DIRS
+#         ${dsp_source}
+#         ${flanger_source})
 
-# delay project
-set(delay_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/Delay)
+# # delay project
+# set(delay_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/Delay)
 
-add_plugin(delay
-    VERSION 0.1.0
-    PLUGIN_NAME "Delay"
-    PROD_NAME Delay
-    PROD_CODE Dlay
-    SYNTH FALSE
-    SOURCES
-        ${delay_source}/PluginEditor.cpp
-        ${delay_source}/PluginProcessor.cpp
-        ${dsp_source}/DelayLine.cpp
-        ${dsp_source}/Delay.cpp
-        ${dsp_source}/Biquad.cpp
-        ${dsp_source}/ParametricEqualizer.cpp
-        ${dsp_source}/Meter.cpp
-        ${gui_source}/MeterComponent.cpp
-        ${gui_source}/MrtaLAF.cpp
-    INCLUDE_DIRS
-        ${dsp_source}
-        ${gui_source}
-        ${delay_source})
+# add_plugin(delay
+#     VERSION 0.1.0
+#     PLUGIN_NAME "Delay"
+#     PROD_NAME Delay
+#     PROD_CODE Dlay
+#     SYNTH FALSE
+#     SOURCES
+#         ${delay_source}/PluginEditor.cpp
+#         ${delay_source}/PluginProcessor.cpp
+#         ${dsp_source}/DelayLine.cpp
+#         ${dsp_source}/Delay.cpp
+#         ${dsp_source}/Biquad.cpp
+#         ${dsp_source}/ParametricEqualizer.cpp
+#         ${dsp_source}/Meter.cpp
+#         ${gui_source}/MeterComponent.cpp
+#         ${gui_source}/MrtaLAF.cpp
+#     INCLUDE_DIRS
+#         ${dsp_source}
+#         ${gui_source}
+#         ${delay_source})
 
 # osc project
-set(osc_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/Oscillators)
+# set(osc_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/Oscillators)
 
-add_plugin(osc
-    VERSION 0.1.0
-    PLUGIN_NAME "Oscillators"
-    PROD_NAME Oscillators
-    PROD_CODE Oscs
-    SYNTH FALSE
-    SOURCES
-        ${osc_source}/PluginEditor.cpp
-        ${osc_source}/PluginProcessor.cpp
-        ${dsp_source}/Oscillator.cpp
-    INCLUDE_DIRS
-        ${dsp_source}
-        ${osc_source})
+# add_plugin(osc
+#     VERSION 0.1.0
+#     PLUGIN_NAME "Oscillators"
+#     PROD_NAME Oscillators
+#     PROD_CODE Oscs
+#     SYNTH FALSE
+#     SOURCES
+#         ${osc_source}/PluginEditor.cpp
+#         ${osc_source}/PluginProcessor.cpp
+#         ${dsp_source}/Oscillator.cpp
+#     INCLUDE_DIRS
+#         ${dsp_source}
+#         ${osc_source})
 
 # midi handling project
-set(midi_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/MidiHandler)
+# set(midi_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/MidiHandler)
 
-add_plugin(midi
-    VERSION 0.1.0
-    PLUGIN_NAME "Midi Handler"
-    PROD_NAME MidiHandler
-    PROD_CODE Mdhd
-    SYNTH TRUE
-    SOURCES
-        ${midi_source}/PluginEditor.cpp
-        ${midi_source}/PluginProcessor.cpp
-        ${dsp_source}/SynthVoice.cpp
-        ${dsp_source}/Oscillator.cpp
-    INCLUDE_DIRS
-        ${dsp_source}
-        ${midi_source})
+# add_plugin(midi
+#     VERSION 0.1.0
+#     PLUGIN_NAME "Midi Handler"
+#     PROD_NAME MidiHandler
+#     PROD_CODE Mdhd
+#     SYNTH TRUE
+#     SOURCES
+#         ${midi_source}/PluginEditor.cpp
+#         ${midi_source}/PluginProcessor.cpp
+#         ${dsp_source}/SynthVoice.cpp
+#         ${dsp_source}/Oscillator.cpp
+#     INCLUDE_DIRS
+#         ${dsp_source}
+#         ${midi_source})
 
 # envelope generator project
-set(envgen_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/EnvelopeGenerator)
+# set(envgen_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/EnvelopeGenerator)
 
-add_plugin(envgen
-    VERSION 0.1.0
-    PLUGIN_NAME "Envelope Generator"
-    PROD_NAME EnvelopeGenerator
-    PROD_CODE Egen
-    SYNTH FALSE
-    SOURCES
-        ${envgen_source}/PluginEditor.cpp
-        ${envgen_source}/PluginProcessor.cpp
-        ${dsp_source}/EnvelopeGenerator.cpp
-    INCLUDE_DIRS
-        ${dsp_source}
-        ${envgen_source})
+# add_plugin(envgen
+#     VERSION 0.1.0
+#     PLUGIN_NAME "Envelope Generator"
+#     PROD_NAME EnvelopeGenerator
+#     PROD_CODE Egen
+#     SYNTH FALSE
+#     SOURCES
+#         ${envgen_source}/PluginEditor.cpp
+#         ${envgen_source}/PluginProcessor.cpp
+#         ${dsp_source}/EnvelopeGenerator.cpp
+#     INCLUDE_DIRS
+#         ${dsp_source}
+#         ${envgen_source})
 
 # state variable filter project
-set(svf_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/StateVariableFilter)
+# set(svf_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/StateVariableFilter)
 
-add_plugin(svf
+# add_plugin(svf
+#     VERSION 0.1.0
+#     PLUGIN_NAME "State Variable Filter"
+#     PROD_NAME StateVariableFilter
+#     PROD_CODE Svff
+#     SYNTH FALSE
+#     SOURCES
+#         ${svf_source}/PluginEditor.cpp
+#         ${svf_source}/PluginProcessor.cpp
+#         ${dsp_source}/StateVariableFilter.cpp
+#         ${dsp_source}/Oscillator.cpp
+#     INCLUDE_DIRS
+#         ${dsp_source}
+#         ${svf_source})
+
+# set(hw2_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/HW2)
+
+# add_plugin(HW2
+#     VERSION 0.1.0
+#     PLUGIN_NAME "Homework 2"
+#     PROD_NAME Homework2
+#     PROD_CODE Hw_2
+#     SYNTH TRUE
+#     SOURCES
+#         ${hw2_source}/PluginEditor.cpp
+#         ${hw2_source}/PluginProcessor.cpp
+#     INCLUDE_DIRS
+#         ${hw2_source})
+
+set(hw3_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/HW3)
+
+add_plugin(HW3
     VERSION 0.1.0
-    PLUGIN_NAME "State Variable Filter"
-    PROD_NAME StateVariableFilter
-    PROD_CODE Svff
-    SYNTH FALSE
-    SOURCES
-        ${svf_source}/PluginEditor.cpp
-        ${svf_source}/PluginProcessor.cpp
-        ${dsp_source}/StateVariableFilter.cpp
-        ${dsp_source}/Oscillator.cpp
-    INCLUDE_DIRS
-        ${dsp_source}
-        ${svf_source})
-
-set(hw2_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/HW2)
-
-add_plugin(HW2
-    VERSION 0.1.0
-    PLUGIN_NAME "Homework 2"
-    PROD_NAME Homework2
-    PROD_CODE Hw_2
+    PLUGIN_NAME "Homework 3"
+    PROD_NAME Homework3
+    PROD_CODE Hw_3
     SYNTH TRUE
+    IS_SYNTH TRUE
+    NEEDS_MIDI_INPUT TRUE
+    NEEDS_MIDI_OUTPUT FALSE
+    EDITOR_WANTS_KEYBOARD_FOCUS TRUE
+    PLUGIN_MANUFACTURER_CODE Juce
+    PLUGIN_CODE Msyn
+    FORMATS VST3
     SOURCES
-        ${hw2_source}/PluginEditor.cpp
-        ${hw2_source}/PluginProcessor.cpp
+        ${hw3_source}/PluginEditor.cpp
+        ${hw3_source}/PluginProcessor.cpp
+        ${hw3_source}/EnvelopeGenerator.cpp
+        ${hw3_source}/StateVariableFilter.cpp
+        ${hw3_source}/Oscillator.cpp
     INCLUDE_DIRS
-        ${hw2_source})
+        ${hw3_source})
