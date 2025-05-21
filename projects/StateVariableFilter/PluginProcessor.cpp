@@ -130,8 +130,8 @@ void StateVariableFilterAudioProcessor::processBlock(juce::AudioBuffer<float>& b
     {
         const float curFreq = freqInBuffer.getSample(0, n);
         const float modAmtHz = curFreq * FreqModAmtMax * freqModAmtBuffer.getSample(0, n);
-        freqInBuffer.setSample(0, n,
-                               modAmtHz * lfoBuffer.getSample(0, n) + curFreq);
+        const float modFreq = modAmtHz * lfoBuffer.getSample(0, n) + curFreq;
+        freqInBuffer.setSample(0, n, modFreq);
     }
 
     // always process left channel

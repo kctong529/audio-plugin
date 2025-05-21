@@ -25,7 +25,7 @@ void Delay::prepare(double newSampleRate, float maxTimeMs, unsigned int numChann
 {
     sampleRate = newSampleRate;
 
-    delayLine.prepare(static_cast<unsigned int>(std::round(maxTimeMs * static_cast<float>(0.001 * sampleRate))), numChannels);
+    delayLine.prepare(static_cast<unsigned int>(std::round(maxTimeMs * static_cast<float>(0.001 * sampleRate))), MaxChannels);
     delayLine.setDelaySamples(1); // Keep at least 1 sample minimum fixed delay
 
     filter.setBandType(0, ParametricEqualizer::LowPass);
@@ -35,7 +35,7 @@ void Delay::prepare(double newSampleRate, float maxTimeMs, unsigned int numChann
 
     const auto distortionLin = std::pow(10.f, 0.05f * distortion);
     preDistortionRamp.prepare(sampleRate, true, distortionLin);
-    postDistortionRamp.prepare(sampleRate, true, 1.f / distortionLin);
+    postDistortionRamp.prepare(sampleRate, true, 2.f / distortionLin);
     timeRamp.prepare(sampleRate, true, delayTimeMs * static_cast<float>(sampleRate * 0.001));
     wowRamp.prepare(sampleRate, true, wow * WowDepthMax * static_cast<float>(sampleRate));
     feedbackRamp.prepare(sampleRate, true, feedback * 0.98f);
@@ -64,8 +64,10 @@ void Delay::process(float* const* output, const float* const* input, unsigned in
         float lfo[2] { 0.f, 0.f };
 
         // squared sine modulation
-        lfo[0] = std::pow(0.5f + 0.5f * std::sin(phaseState[0]), 2.f);
-        lfo[1] = std::pow(0.5f + 0.5f * std::sin(phaseState[1]), 2.f);
+        const auto lfo_left { 0.5f + 0.5f * std::sin(phaseState[0]) };
+        const auto lfo_right { 0.5f + 0.5f * std::sin(phaseState[1]) };
+        lfo[0] = lfo_left * lfo_left;
+        lfo[1] = lfo_right * lfo_right;
 
         // Increment and wrap phase states
         phaseState[0] = std::fmod(phaseState[0] + phaseInc, static_cast<float>(2 * M_PI));
@@ -111,7 +113,7 @@ void Delay::setDelayTime(float newDelayMs)
 
 void Delay::setWow(float wowNorm)
 {
-    wow = std::fmax(wowNorm, 0.f);
+    wow = std::clamp(wowNorm, 0.f, 1.f);
     wowRamp.setTarget(wow * WowDepthMax * static_cast<float>(sampleRate));
 }
 
@@ -129,10 +131,10 @@ void Delay::setToneFrequency(float toneFreqHz)
 
 void Delay::setDistortion(float distortionDb)
 {
-    distortion = std::clamp(distortionDb, 0.f, 24.f);
+    distortion = std::clamp(distortionDb, 0.f, 36.f);
     const auto distortionLin = std::pow(10.f, 0.05f * distortion);
     preDistortionRamp.setTarget(distortionLin);
-    postDistortionRamp.setTarget(1.f / distortionLin);
+    postDistortionRamp.setTarget(2.f / distortionLin);
 }
 
 }

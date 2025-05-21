@@ -14,11 +14,14 @@ ParametricEQAudioProcessorEditor::ParametricEQAudioProcessorEditor(ParametricEQA
     addAndMakeVisible(band1ParameterEditor);
     addAndMakeVisible(band2ParameterEditor);
 
+    band0ParameterEditor.setLookAndFeel(&laf);
+
     setSize(NumOfBands * BandWidth, ParamsPerBand * ParamHeight);
 }
 
 ParametricEQAudioProcessorEditor::~ParametricEQAudioProcessorEditor()
 {
+    band0ParameterEditor.setLookAndFeel(nullptr);
 }
 
 void ParametricEQAudioProcessorEditor::paint (juce::Graphics& g)

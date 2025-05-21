@@ -2,9 +2,9 @@
 #include "JuceHeader.h"
 #include "Oscillator.h"
 #include "PluginEditor.h"
+#include "SynthVoice.h"
 #include "mrta_utils/Source/Parameter/ParameterInfo.h"
 #include "mrta_utils/Source/Parameter/ParameterManager.h"
-#include <vector>
 
 
 static const std::vector<mrta::ParameterInfo> paramVector
