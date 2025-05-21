@@ -50,6 +50,8 @@ public:
     // Set delay time modulation waveform type
     void setModulationType(ModulationType newModType);
 
+    static constexpr int MaxChannels { 2 };
+
 private:
     double sampleRate { 48000.0 };
 
@@ -63,7 +65,6 @@ private:
 
     float offsetMs { 0.f };
     float modDepthMs { 0.f };
-    float feedback { 0.f };
     float modRate { 0.f };
 
     ModulationType modType { Sin };

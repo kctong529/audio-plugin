@@ -83,7 +83,7 @@ public:
     void changeProgramName (int index, const juce::String& newName) override;
     //==============================================================================
 
-    static const unsigned int MaxDelaySizeSamples { 1 << 12 };
+    static constexpr float MaxDelaySizeMs { 20.f };
     static const unsigned int MaxChannels { 2 };
     static const unsigned int MaxProcessBlockSamples{ 32 };
 
@@ -92,6 +92,7 @@ private:
     DSP::Flanger flanger;
     DSP::Ramp<float> enableRamp;
 
+    bool enabled { true };
     juce::AudioBuffer<float> fxBuffer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FlangerAudioProcessor)

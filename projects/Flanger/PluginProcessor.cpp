@@ -14,13 +14,14 @@ static const std::vector<mrta::ParameterInfo> Parameters
 
 FlangerAudioProcessor::FlangerAudioProcessor() :
     parameterManager(*this, ProjectInfo::projectName, Parameters),
-    flanger(20.f, 2),
+    flanger(MaxDelaySizeMs, 2),
     enableRamp(0.05f)
 {
     parameterManager.registerParameterCallback(Param::ID::Enabled,
     [this](float newValue, bool force)
     {
-        enableRamp.setTarget(std::fmin(std::fmax(newValue, 0.f), 1.f), force);
+        enabled = newValue > 0.5f;
+        enableRamp.setTarget(enabled ? 1.f : 0.f, force);
     });
 
     parameterManager.registerParameterCallback(Param::ID::Offset,
@@ -57,8 +58,8 @@ void FlangerAudioProcessor::prepareToPlay(double newSampleRate, int samplesPerBl
 {
     const unsigned int numChannels { static_cast<unsigned int>(std::max(getMainBusNumInputChannels(), getMainBusNumOutputChannels())) };
 
-    flanger.prepare(newSampleRate, 20.f, numChannels);
-    enableRamp.prepare(newSampleRate);
+    flanger.prepare(newSampleRate, MaxDelaySizeMs, numChannels);
+    enableRamp.prepare(newSampleRate, true, enabled ? 1.f : 0.f);
 
     parameterManager.updateParameters(true);
 

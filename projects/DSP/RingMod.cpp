@@ -65,7 +65,7 @@ void RingMod::setModRate(float newModRate)
 
 void RingMod::setModType(ModType type)
 {
-    modType = type;
+    modType = type > Sqr ? Sqr : type;
 }
 
 
