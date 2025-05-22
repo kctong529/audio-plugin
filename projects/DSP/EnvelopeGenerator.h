@@ -23,6 +23,8 @@ public:
     // trigger the ending of the envelope - note off
     void end();
 
+    bool isOff() const { return state == OFF; }
+
     void setAnalogStyle(bool isAnalogStyle);
     void setAttackTime(float attackTimeMs);
     void setDecayTime(float decayTimeMs);

@@ -45,7 +45,6 @@ set(company_copyright "Modern Real-Time Audio Oy")
 set(company_code "Mrta")
 set(company_bundle_id "com.ModernRealTimeAudio")
 
-
 # This function adds a JUCE plugin target to this project
 # Arguments:
 #   - TARGET: The name of your plugin target, this allows you to identify which of your plugins will be built.
@@ -74,26 +73,21 @@ function(add_plugin target)
     #message(STATUS "  INCLUDE_DIRS: ${AP_INCLUDE_DIRS}")
 
     # Add juce plugin target
-    set(AP_PLUGIN_NAME "RingModulator")  # Set this to your plugin's name
-    message(STATUS "PLUGIN_NAME: ${AP_PLUGIN_NAME}")  # This will show the plugin name in the terminal
     juce_add_plugin(${target}
         PRODUCT_NAME ${AP_PROD_NAME}
         VERSION ${AP_VERSION}
         MICROPHONE_PERMISSION_ENABLED TRUE
         COMPANY_COPYRIGHT ${company_copyright}
         COMPANY_NAME ${company_name}
-        FORMATS VST3 AU Standalone
+        FORMATS Standalone VST3 AU Standalone
         PLUGIN_NAME ${AP_PLUGIN_NAME}
         PLUGIN_MANUFACTURER_CODE ${company_code}
         PLUGIN_CODE ${AP_PROD_CODE}
         BUNDLE_ID ${company_bundle_id}.${AP_PROD_NAME}
-        IS_SYNTH FALSE
-        NEEDS_MIDI_INPUT FALSE
+        IS_SYNTH ${AP_SYNTH}
+        NEEDS_MIDI_INPUT ${AP_SYNTH}
         NEEDS_MIDI_OUTPUT FALSE
-        COPY_PLUGIN_AFTER_BUILD TRUE
-        
-        PLUGIN_CHANNEL_CONFIGURATIONS "2-2"
-    )
+        COPY_PLUGIN_AFTER_BUILD TRUE)
     juce_generate_juce_header(${target})
 
     target_sources(${target}
@@ -149,20 +143,6 @@ set(gui_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/GUI)
 #         ${mfrtaa_source}/PluginProcessor.cpp
 #     INCLUDE_DIRS
 #         ${mfrtaa_source})
-
-# set(hw1_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/HW1)
-
-# add_plugin(HW1
-#     VERSION 0.1.0
-#     PLUGIN_NAME "Homework 1"
-#     PROD_NAME Homework1
-#     PROD_CODE Hw_1
-#     SYNTH TRUE
-#     SOURCES
-#         ${hw1_source}/PluginEditor.cpp
-#         ${hw1_source}/PluginProcessor.cpp
-#     INCLUDE_DIRS
-#         ${hw1_source})
 
 # # ring mod project
 # set(ringmod_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/RingModulator)
@@ -243,7 +223,7 @@ set(gui_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/GUI)
 #         ${gui_source}
 #         ${delay_source})
 
-# osc project
+# # osc project
 # set(osc_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/Oscillators)
 
 # add_plugin(osc
@@ -260,7 +240,7 @@ set(gui_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/GUI)
 #         ${dsp_source}
 #         ${osc_source})
 
-# midi handling project
+# # midi handling project
 # set(midi_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/MidiHandler)
 
 # add_plugin(midi
@@ -278,7 +258,7 @@ set(gui_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/GUI)
 #         ${dsp_source}
 #         ${midi_source})
 
-# envelope generator project
+# # envelope generator project
 # set(envgen_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/EnvelopeGenerator)
 
 # add_plugin(envgen
@@ -295,7 +275,7 @@ set(gui_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/GUI)
 #         ${dsp_source}
 #         ${envgen_source})
 
-# state variable filter project
+# # state variable filter project
 # set(svf_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/StateVariableFilter)
 
 # add_plugin(svf
@@ -313,40 +293,58 @@ set(gui_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/GUI)
 #         ${dsp_source}
 #         ${svf_source})
 
-# set(hw2_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/HW2)
+# # mono synth project
+# set(synth ${CMAKE_CURRENT_SOURCE_DIR}/projects/Synth)
 
-# add_plugin(HW2
+# add_plugin(synth
 #     VERSION 0.1.0
-#     PLUGIN_NAME "Homework 2"
-#     PROD_NAME Homework2
-#     PROD_CODE Hw_2
+#     PLUGIN_NAME "Synth"
+#     PROD_NAME Synth
+#     PROD_CODE Syth
 #     SYNTH TRUE
 #     SOURCES
-#         ${hw2_source}/PluginEditor.cpp
-#         ${hw2_source}/PluginProcessor.cpp
+#         ${synth}/PluginEditor.cpp
+#         ${synth}/PluginProcessor.cpp
+#         ${dsp_source}/Synth.cpp
+#         ${dsp_source}/Oscillator.cpp
+#         ${dsp_source}/EnvelopeGenerator.cpp
+#         ${dsp_source}/StateVariableFilter.cpp
 #     INCLUDE_DIRS
-#         ${hw2_source})
+#         ${gui_source}
+#         ${dsp_source}
+#         ${synth})
 
-set(hw3_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/HW3)
+# homework 3 plugin template
+set(amp_model_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/AmpModel)
 
-add_plugin(HW3
+add_plugin(amp_model
     VERSION 0.1.0
-    PLUGIN_NAME "Homework 3"
-    PROD_NAME Homework3
-    PROD_CODE Hw_3
-    SYNTH TRUE
-    IS_SYNTH TRUE
-    NEEDS_MIDI_INPUT TRUE
-    NEEDS_MIDI_OUTPUT FALSE
-    EDITOR_WANTS_KEYBOARD_FOCUS TRUE
-    PLUGIN_MANUFACTURER_CODE Juce
-    PLUGIN_CODE Msyn
-    FORMATS VST3
+    PLUGIN_NAME "Amp Model"
+    PROD_NAME AmpModel
+    PROD_CODE AmpM
+    SYNTH FALSE
     SOURCES
-        ${hw3_source}/PluginEditor.cpp
-        ${hw3_source}/PluginProcessor.cpp
-        ${hw3_source}/EnvelopeGenerator.cpp
-        ${hw3_source}/StateVariableFilter.cpp
-        ${hw3_source}/Oscillator.cpp
+        ${amp_model_source}/PluginEditor.cpp
+        ${amp_model_source}/PluginProcessor.cpp
+        ${amp_model_source}/AmpGruParameters.cpp
     INCLUDE_DIRS
-        ${hw3_source})
+        ${gui_source}
+        ${dsp_source}
+        ${amp_model_source})
+
+# set(retrofox_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/RetroFoX)
+
+# add_plugin(retrofox
+#     VERSION 0.1.0
+#     PLUGIN_NAME "RetroFoX"
+#     PROD_NAME RetroFoX
+#     PROD_CODE RtFX
+#     SYNTH FALSE
+#     SOURCES
+#         ${retrofox_source}/PluginEditor.cpp
+#         ${retrofox_source}/PluginProcessor.cpp
+#         ${retrofox_source}/Flanger.cpp
+#         ${retrofox_source}/DelayLine.cpp
+
+#     INCLUDE_DIRS
+#         ${retrofox_source})
