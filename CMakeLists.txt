@@ -346,6 +346,7 @@ add_plugin(retrofox
         ${retrofox_source}/PluginProcessor.cpp
         ${retrofox_source}/Flanger.cpp
         ${retrofox_source}/DelayLine.cpp
+        ${retrofox_source}/Bitcrusher.cpp
 
     INCLUDE_DIRS
         ${retrofox_source})

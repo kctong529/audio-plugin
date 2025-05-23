@@ -2,6 +2,7 @@
 
 #include <JuceHeader.h>
 #include "Flanger.h"
+#include "BitCrusher.h"
 
 namespace Param
 {
@@ -11,6 +12,10 @@ namespace Param
 
         // Drive/distortion params
         static const juce::String Drive { "drive" };
+
+        // Bitcrusher params
+        static const juce::String BitDepth { "bit_depth" };
+        static const juce::String RateReduce { "rate_reduce" };
 
         // Flanger/chorus params
         static const juce::String Offset { "offset" };
@@ -28,6 +33,9 @@ namespace Param
         static const juce::String Enabled { "Enabled" };
 
         static const juce::String Drive { "Drive" };
+    
+        static const juce::String BitDepth { "Bit Depth" };
+        static const juce::String RateReduce { "Rate Reduce" };
 
         static const juce::String Offset { "Offset" };
         static const juce::String Depth { "Depth" };
@@ -106,10 +114,13 @@ private:
     mrta::ParameterManager parameterManager;
 
     juce::dsp::LadderFilter<float> filter;
-    juce::SmoothedValue<float> outputGain;
+
+    BitCrusher bitCrusher;
 
     DSP::Flanger flanger;
     DSP::Ramp<float> enableRamp;
+
+    juce::SmoothedValue<float> outputGain;
 
     bool enabled { true };
     juce::AudioBuffer<float> fxBuffer;

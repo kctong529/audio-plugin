@@ -7,16 +7,20 @@ static const std::vector<mrta::ParameterInfo> Parameters
 {
     
         //{ Param::ID::Enabled,  Param::Name::Enabled,   "Off", "On", true },
-        { Param::ID::Enabled,  Param::Name::Enabled,  Param::Ranges::EnabledOff, Param::Ranges::EnabledOn, true },
+        { Param::ID::Enabled,     Param::Name::Enabled,  Param::Ranges::EnabledOff, Param::Ranges::EnabledOn, true },
 
-        { Param::ID::Drive,    Param::Name::Drive,     "", 1.f, 1.f, 10.f, 0.1f, 1.f },
+        { Param::ID::Drive,       Param::Name::Drive,     "", 1.f, 1.f, 10.f, 0.1f, 1.f }, // Drive taken from MyFirstRealTimeAudioApp
+
+        { Param::ID::BitDepth,    Param::Name::BitDepth,     "bits", 16.f, 1.f, 24.f, 1.f, 1.f }, // 1-24 bits, default 16.
+        { Param::ID::RateReduce,  Param::Name::RateReduce,     "x", 1.f, 1.f, 64.f, 1.f, 2.f }, // 1x to 64x downsampling factor, default 1.
+
+        // Flanger based on course Flanger project
+        { Param::ID::Offset,      Param::Name::Offset,   Param::Units::Ms,  2.f,  Param::Ranges::OffsetMin,   Param::Ranges::OffsetMax,   Param::Ranges::OffsetInc,   Param::Ranges::OffsetSkw },
+        { Param::ID::Depth,       Param::Name::Depth,    Param::Units::Ms,  2.f,  Param::Ranges::DepthMin,    Param::Ranges::DepthMax,    Param::Ranges::DepthInc,    Param::Ranges::DepthSkw },
+        { Param::ID::Rate,        Param::Name::Rate,     Param::Units::Hz,  0.5f, Param::Ranges::RateMin,     Param::Ranges::RateMax,     Param::Ranges::RateInc,     Param::Ranges::RateSkw },
+        { Param::ID::ModType,     Param::Name::ModType,  Param::Ranges::ModLabels, 0 },
     
-        { Param::ID::Offset,   Param::Name::Offset,   Param::Units::Ms,  2.f,  Param::Ranges::OffsetMin,   Param::Ranges::OffsetMax,   Param::Ranges::OffsetInc,   Param::Ranges::OffsetSkw },
-        { Param::ID::Depth,    Param::Name::Depth,    Param::Units::Ms,  2.f,  Param::Ranges::DepthMin,    Param::Ranges::DepthMax,    Param::Ranges::DepthInc,    Param::Ranges::DepthSkw },
-        { Param::ID::Rate,     Param::Name::Rate,     Param::Units::Hz,  0.5f, Param::Ranges::RateMin,     Param::Ranges::RateMax,     Param::Ranges::RateInc,     Param::Ranges::RateSkw },
-        { Param::ID::ModType,  Param::Name::ModType,  Param::Ranges::ModLabels, 0 },
-    
-        { Param::ID::PostGain,  Param::Name::PostGain,  "dB", 0.0f, -60.f, 12.f, 0.1f, 3.8018f },
+        { Param::ID::PostGain,    Param::Name::PostGain,  "dB", 0.0f, -60.f, 12.f, 0.1f, 3.8018f },
     
 };
 
@@ -37,6 +41,21 @@ MainProcessor::MainProcessor() :
     {
         DBG(Param::Name::Drive + ": " + juce::String { value });
         filter.setDrive(value);
+    });
+
+     parameterManager.registerParameterCallback(Param::ID::BitDepth,
+    [this](float newValue, bool /*force*/)
+    {
+        DBG(Param::Name::BitDepth + ": " + juce::String{ newValue });
+        bitCrusher.setBitDepth(newValue);
+    });
+
+    parameterManager.registerParameterCallback(Param::ID::RateReduce,
+    [this](float newValue, bool /*force*/)
+    {
+        DBG(Param::Name::RateReduce + ": " + juce::String{ newValue });
+        bitCrusher.setRateReduction(static_cast<int>(std::max(1.0f, newValue)));
+
     });
 
     parameterManager.registerParameterCallback(Param::ID::Offset,
@@ -105,6 +124,8 @@ void MainProcessor::prepareToPlay(double newSampleRate, int samplesPerBlock)
     // The drive will be set by the parameter callback when updateParameters(true) is called below.
     // Or you could set a default initial drive here: filter.setDrive(1.0f);
 
+    bitCrusher.prepare(newSampleRate, samplesPerBlock); // Call your custom class's method
+
     flanger.prepare(newSampleRate, MaxDelaySizeMs, numChannels);
     enableRamp.prepare(newSampleRate, true, enabled ? 1.f : 0.f);
     //filter.prepare({ newSampleRate, static_cast<juce::uint32>(samplesPerBlock), numChannels });
@@ -122,6 +143,7 @@ void MainProcessor::prepareToPlay(double newSampleRate, int samplesPerBlock)
 void MainProcessor::releaseResources()
 {
     filter.reset();
+    bitCrusher.reset();
     flanger.clear();
 }
 
@@ -133,6 +155,7 @@ void MainProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBu
     const unsigned int numChannels { static_cast<unsigned int>(buffer.getNumChannels()) };
     const unsigned int numSamples { static_cast<unsigned int>(buffer.getNumSamples()) };
 
+    // Drive (via filter)
     {
         juce::dsp::AudioBlock<float> audioBlock(buffer);
         //juce::dsp::AudioBlock<float> audioBlock(buffer.getArrayOfWritePointers(), buffer.getNumChannels(), buffer.getNumSamples());
@@ -140,6 +163,14 @@ void MainProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBu
         filter.process(ctx);
     }
 
+    // Bitcrushing
+    for(int ch = 0; ch < static_cast<int>(numChannels); ++ch){
+        bitCrusher.reset();
+        auto* channelData = buffer.getWritePointer(ch);
+        bitCrusher.processBlock(channelData, numSamples);
+    }
+
+    // Flanger
     for (int ch = 0; ch < static_cast<int>(numChannels); ++ch)
         fxBuffer.copyFrom(ch, 0, buffer, ch, 0, static_cast<int>(numSamples));
 
@@ -149,6 +180,7 @@ void MainProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBu
     for (int ch = 0; ch < static_cast<int>(numChannels); ++ch)
         buffer.addFrom(ch, 0, fxBuffer, ch, 0, static_cast<int>(numSamples));
     
+    // Output gain
     outputGain.applyGain(buffer, buffer.getNumSamples());
 
 }
