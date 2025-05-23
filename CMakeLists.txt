@@ -315,36 +315,37 @@ set(gui_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/GUI)
 #         ${synth})
 
 # homework 3 plugin template
-set(amp_model_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/AmpModel)
+# set(amp_model_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/AmpModel)
 
-add_plugin(amp_model
-    VERSION 0.1.0
-    PLUGIN_NAME "Amp Model"
-    PROD_NAME AmpModel
-    PROD_CODE AmpM
-    SYNTH FALSE
-    SOURCES
-        ${amp_model_source}/PluginEditor.cpp
-        ${amp_model_source}/PluginProcessor.cpp
-        ${amp_model_source}/AmpGruParameters.cpp
-    INCLUDE_DIRS
-        ${gui_source}
-        ${dsp_source}
-        ${amp_model_source})
-
-# set(retrofox_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/RetroFoX)
-
-# add_plugin(retrofox
+# add_plugin(amp_model
 #     VERSION 0.1.0
-#     PLUGIN_NAME "RetroFoX"
-#     PROD_NAME RetroFoX
-#     PROD_CODE RtFX
+#     PLUGIN_NAME "Amp Model"
+#     PROD_NAME AmpModel
+#     PROD_CODE AmpM
 #     SYNTH FALSE
 #     SOURCES
-#         ${retrofox_source}/PluginEditor.cpp
-#         ${retrofox_source}/PluginProcessor.cpp
-#         ${retrofox_source}/Flanger.cpp
-#         ${retrofox_source}/DelayLine.cpp
-
+#         ${amp_model_source}/PluginEditor.cpp
+#         ${amp_model_source}/PluginProcessor.cpp
+#         ${amp_model_source}/AmpGruParameters.cpp
 #     INCLUDE_DIRS
-#         ${retrofox_source})
+#         ${gui_source}
+#         ${dsp_source}
+#         ${amp_model_source})
+
+set(retrofox_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/RetroFoX)
+
+add_plugin(retrofox
+    VERSION 0.1.0
+    PLUGIN_NAME "RetroFoX"
+    PROD_NAME RetroFoX
+    PROD_CODE RtFX
+    SYNTH FALSE
+    EFFECT TRUE
+    SOURCES
+        ${retrofox_source}/PluginEditor.cpp
+        ${retrofox_source}/PluginProcessor.cpp
+        ${retrofox_source}/Flanger.cpp
+        ${retrofox_source}/DelayLine.cpp
+
+    INCLUDE_DIRS
+        ${retrofox_source})

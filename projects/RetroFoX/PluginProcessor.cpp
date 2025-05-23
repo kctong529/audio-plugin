@@ -87,11 +87,29 @@ void MainProcessor::prepareToPlay(double newSampleRate, int samplesPerBlock)
 {
     const unsigned int numChannels { static_cast<unsigned int>(std::max(getMainBusNumInputChannels(), getMainBusNumOutputChannels())) };
 
-    filter.prepare({ newSampleRate, static_cast<juce::uint32>(samplesPerBlock), numChannels });
+    juce::dsp::ProcessSpec spec;
+    spec.sampleRate = newSampleRate;
+    spec.maximumBlockSize = static_cast<juce::uint32>(samplesPerBlock);
+    spec.numChannels = numChannels;
 
+
+    filter.prepare(spec);
+    filter.setMode(juce::dsp::LadderFilterMode::LPF24); // Or LPF12. LPF is often default.
+                                                        // Using LPF24 for a bit more character if desired.
+    filter.setCutoffFrequencyHz(20000.0f); // Set cutoff very high to minimize filtering.
+                                           // Or more robustly: (float)(newSampleRate / 2.0 * 0.99)
+                                           // to ensure it's just below Nyquist for any sample rate.
+    filter.setResonance(0.0f);             // Set resonance to minimum to avoid peaking.
+                                           // Some filters might prefer a tiny non-zero value like 0.1f
+                                           // but 0.0f is usually fine for no resonance with Ladder.
+    // The drive will be set by the parameter callback when updateParameters(true) is called below.
+    // Or you could set a default initial drive here: filter.setDrive(1.0f);
 
     flanger.prepare(newSampleRate, MaxDelaySizeMs, numChannels);
     enableRamp.prepare(newSampleRate, true, enabled ? 1.f : 0.f);
+    //filter.prepare({ newSampleRate, static_cast<juce::uint32>(samplesPerBlock), numChannels });
+    //flanger.prepare(newSampleRate, MaxDelaySizeMs, numChannels);
+    //enableRamp.prepare(newSampleRate, true, enabled ? 1.f : 0.f);
 
     outputGain.reset(newSampleRate, 0.01f);
 
@@ -116,9 +134,10 @@ void MainProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBu
     const unsigned int numSamples { static_cast<unsigned int>(buffer.getNumSamples()) };
 
     {
-        juce::dsp::AudioBlock<float> audioBlock(buffer.getArrayOfWritePointers(), buffer.getNumChannels(), buffer.getNumSamples());
+        juce::dsp::AudioBlock<float> audioBlock(buffer);
+        //juce::dsp::AudioBlock<float> audioBlock(buffer.getArrayOfWritePointers(), buffer.getNumChannels(), buffer.getNumSamples());
         juce::dsp::ProcessContextReplacing<float> ctx(audioBlock);
-        //filter.process(ctx);
+        filter.process(ctx);
     }
 
     for (int ch = 0; ch < static_cast<int>(numChannels); ++ch)
