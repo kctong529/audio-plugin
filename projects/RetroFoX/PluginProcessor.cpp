@@ -15,19 +15,30 @@ static const std::vector<mrta::ParameterInfo> Parameters
         { Param::ID::RateReduce,  Param::Name::RateReduce,     "x", 1.f, 1.f, 64.f, 1.f, 2.f }, // 1x to 64x downsampling factor, default 1.
 
         // Flanger based on course Flanger project
-        { Param::ID::Offset,      Param::Name::Offset,   Param::Units::Ms,  2.f,  Param::Ranges::OffsetMin,   Param::Ranges::OffsetMax,   Param::Ranges::OffsetInc,   Param::Ranges::OffsetSkw },
-        { Param::ID::Depth,       Param::Name::Depth,    Param::Units::Ms,  2.f,  Param::Ranges::DepthMin,    Param::Ranges::DepthMax,    Param::Ranges::DepthInc,    Param::Ranges::DepthSkw },
-        { Param::ID::Rate,        Param::Name::Rate,     Param::Units::Hz,  0.5f, Param::Ranges::RateMin,     Param::Ranges::RateMax,     Param::Ranges::RateInc,     Param::Ranges::RateSkw },
-        { Param::ID::ModType,     Param::Name::ModType,  Param::Ranges::ModLabels, 0 },
+        // { Param::ID::Offset,      Param::Name::Offset,   "ms",  2.f,  Param::Ranges::OffsetMin,   Param::Ranges::OffsetMax,   Param::Ranges::OffsetInc,   Param::Ranges::OffsetSkw },
+        // { Param::ID::Depth,       Param::Name::Depth,    "ms",  2.f,  Param::Ranges::DepthMin,    Param::Ranges::DepthMax,    Param::Ranges::DepthInc,    Param::Ranges::DepthSkw },
+        // { Param::ID::Rate,        Param::Name::Rate,     "Hz",  0.5f, Param::Ranges::RateMin,     Param::Ranges::RateMax,     Param::Ranges::RateInc,     Param::Ranges::RateSkw },
+        // { Param::ID::ModType,     Param::Name::ModType,  Param::Ranges::ModLabels, 0 },
+        { Param::ID::FlangerIntensity, Param::Name::FlangerIntensity, "%", 0.0f, Param::Ranges::FlangerIntensityMin, Param::Ranges::FlangerIntensityMax, Param::Ranges::FlangerIntensityInc, Param::Ranges::FlangerIntensitySkw },
     
         { Param::ID::PostGain,    Param::Name::PostGain,  "dB", 0.0f, -60.f, 12.f, 0.1f, 3.8018f },
-    
+
+        { Param::ID::TremoloEnabled, Param::Name::TremoloEnabled, Param::Ranges::EnabledOff, Param::Ranges::EnabledOn, true },
+        { Param::ID::TremoloRate,    Param::Name::TremoloRate, "Hz", 1.0f, Param::Ranges::TremoloRateMin, Param::Ranges::TremoloRateMax, Param::Ranges::TremoloRateInc, Param::Ranges::TremoloRateSkw },
+        { Param::ID::TremoloDepth,   Param::Name::TremoloDepth, "%", 0.0f, Param::Ranges::TremoloDepthMin, Param::Ranges::TremoloDepthMax, Param::Ranges::TremoloDepthInc, Param::Ranges::TremoloDepthSkw },
+
 };
 
 MainProcessor::MainProcessor() :
     parameterManager(*this, ProjectInfo::projectName, Parameters),
     flanger(MaxDelaySizeMs, 2),
-    enableRamp(0.05f)
+    enableRamp(0.05f),
+    flangerMinOffsetMs(1.0f),       // e.g., minimum average delay for "intense" effect
+    flangerMaxOffsetMs(7.0f),       // e.g., maximum average delay for "subtle" effect
+    flangerMinDepthMs(0.1f),       // e.g., minimum sweep depth
+    flangerMaxDepthMs(5.0f),       // e.g., maximum sweep depth (could be Param::Ranges::DepthMax)
+    flangerMinRateHz(0.1f),        // e.g., minimum LFO rate
+    flangerMaxRateHz(2.5f)         // e.g., a moderate maximum LFO rate
 {
     parameterManager.registerParameterCallback(Param::ID::Enabled,
     [this](float newValue, bool force)
@@ -58,29 +69,92 @@ MainProcessor::MainProcessor() :
 
     });
 
-    parameterManager.registerParameterCallback(Param::ID::Offset,
-    [this] (float newValue, bool /*force*/)
-    {
-        flanger.setOffset(newValue);
-    });
+    // parameterManager.registerParameterCallback(Param::ID::Offset,
+    // [this] (float newValue, bool /*force*/)
+    // {
+    //     flanger.setOffset(newValue);
+    // });
 
-    parameterManager.registerParameterCallback(Param::ID::Depth,
+    // parameterManager.registerParameterCallback(Param::ID::Depth,
+    // [this](float newValue, bool /*force*/)
+    // {
+    //     flanger.setDepth(newValue);
+    // });
+
+    // parameterManager.registerParameterCallback(Param::ID::Rate,
+    // [this] (float newValue, bool /*force*/)
+    // {
+    //     flanger.setModulationRate(newValue);
+    // });
+
+    // parameterManager.registerParameterCallback(Param::ID::ModType,
+    // [this](float newValue, bool /*force*/)
+    // {
+    //     DSP::Flanger::ModulationType modType = static_cast<DSP::Flanger::ModulationType>(std::round(newValue));
+    //     flanger.setModulationType(std::min(std::max(modType, DSP::Flanger::Sin), DSP::Flanger::Tri));
+    // });
+     parameterManager.registerParameterCallback(Param::ID::FlangerIntensity,
     [this](float newValue, bool /*force*/)
     {
-        flanger.setDepth(newValue);
-    });
+        // newValue is typically 0-100 from the parameter definition. Convert to 0.0-1.0.
+        float intensity = newValue / Param::Ranges::FlangerIntensityMax; // Or just / 100.0f if max is 100
+        intensity = std::max(0.0f, std::min(intensity, 1.0f)); // Clamp
 
-    parameterManager.registerParameterCallback(Param::ID::Rate,
-    [this] (float newValue, bool /*force*/)
-    {
-        flanger.setModulationRate(newValue);
-    });
+        // --- Mapping Logic ---
+        // This is where you define how the intensity controls the flanger's character.
+        // Example: As intensity increases:
+        // - Depth increases from minDepth to maxDepth.
+        // - Rate might increase from a slow rate to a moderate rate.
+        // - Offset might decrease (shorter delay for more metallic flange at high intensity).
 
-    parameterManager.registerParameterCallback(Param::ID::ModType,
-    [this](float newValue, bool /*force*/)
-    {
-        DSP::Flanger::ModulationType modType = static_cast<DSP::Flanger::ModulationType>(std::round(newValue));
-        flanger.setModulationType(std::min(std::max(modType, DSP::Flanger::Sin), DSP::Flanger::Tri));
+        // Depth: simple linear mapping
+        // When intensity is 0, depth is 0 (or flangerMinDepthMs if you always want some).
+        // When intensity is 1, depth is flangerMaxDepthMs.
+        float currentDepth = intensity * flangerMaxDepthMs; 
+        // If you want a minimum depth even at low intensity (but > 0), you could do:
+        // float currentDepth = (intensity == 0.0f) ? 0.0f : juce::jmap(intensity, flangerMinDepthMs, flangerMaxDepthMs);
+
+
+        // Rate: linear mapping
+        float currentRate = juce::jmap(intensity, flangerMinRateHz, flangerMaxRateHz);
+        // For very low intensity, you might want rate to be 0 or very slow.
+        if (intensity < 0.01f) currentRate = 0.0f; // or flangerMinRateHz
+
+        // Offset: inverse linear mapping (higher intensity = lower offset)
+        // When intensity is 0, offset is flangerMaxOffsetMs (more subtle).
+        // When intensity is 1, offset is flangerMinOffsetMs (more pronounced/metallic).
+        float currentOffset = juce::jmap(intensity, flangerMaxOffsetMs, flangerMinOffsetMs);
+        if (intensity < 0.01f) currentOffset = flangerMaxOffsetMs; // Ensure max offset at zero intensity
+
+        flanger.setDepth(currentDepth);
+        flanger.setModulationRate(currentRate);
+        flanger.setOffset(currentOffset);
+
+        // You can also decide on a fixed ModType or even change it based on intensity
+        // For simplicity, let's keep it fixed, e.g., Sine.
+        // This would have been set during flanger.prepare or an initial setup.
+        // If not, you can set it here:
+        // flanger.setModulationType(DSP::Flanger::Sin); // Or make it part of the mapping
+
+        DBG(Param::Name::FlangerIntensity + ": " + juce::String(newValue) + "% -> "
+            + "Offset: " + juce::String(currentOffset, 2) + "ms, "
+            + "Depth: " + juce::String(currentDepth, 2) + "ms, "
+            + "Rate: " + juce::String(currentRate, 2) + "Hz");
+
+        // The Param::ID::Enabled for the flanger (if you still have one)
+        // might now be controlled by whether intensity > 0
+        // For example, you might want enableRamp to target 0 if intensity is 0
+        // and 1 if intensity > 0.
+        // This depends on how your 'enabled' flag for the flanger effect is used.
+        // If 'enableRamp' is for the *entire* flanger effect block:
+        bool flangerShouldBeOn = intensity > 0.001f; // Small threshold
+        // And if 'enabled' member variable controls the flanger's bypass via enableRamp:
+        // enabled = flangerShouldBeOn; // This might conflict if 'enabled' is global
+        // It's better if 'enableRamp' is specifically for the flanger effect itself.
+        // If your existing 'enableRamp' controls the flanger's wet signal:
+        enableRamp.setTarget(flangerShouldBeOn ? 1.f : 0.f, false /*not forced here, let ramp do its job*/);
+
+
     });
 
     parameterManager.registerParameterCallback(Param::ID::PostGain,
@@ -95,6 +169,37 @@ MainProcessor::MainProcessor() :
             outputGain.setCurrentAndTargetValue(dbValue);
         else
             outputGain.setTargetValue(dbValue);
+    });
+
+    parameterManager.registerParameterCallback(Param::ID::TremoloEnabled,
+    [this](float newValue, bool /*force*/)
+    {
+        tremoloEffectEnabled = newValue > 0.5f;
+        DBG("Tremolo Enabled: " + juce::String(tremoloEffectEnabled ? "On" : "Off"));
+        // Optional: reset LFO phase when enabled/disabled if desired
+        // if (tremoloEffectEnabled && getSampleRate() > 0) tremoloLFO.reset();
+    });
+
+    parameterManager.registerParameterCallback(Param::ID::TremoloRate,
+    [this] (float newValue, bool /*force*/)
+    {
+        tremoloRateHz = newValue;
+        if (getSampleRate() > 0) // Ensure LFO is prepared
+        {
+            tremoloLFO.setFrequency(tremoloRateHz); // Smooth frequency update
+        }
+        DBG("Tremolo Rate: " + juce::String(tremoloRateHz) + " Hz");
+    });
+
+    parameterManager.registerParameterCallback(Param::ID::TremoloDepth,
+    [this](float newValue, bool /*force*/)
+    {
+        // Assuming the parameter's range is 0-100 for percentage
+        // If Param::Ranges::TremoloDepthMax is 1.0, remove / 100.0f
+        tremoloDepth = newValue / 100.0f; 
+        // Clamp to ensure it's within 0.0 to 1.0 after division, just in case.
+        tremoloDepth = std::max(0.0f, std::min(tremoloDepth, 1.0f)); 
+        DBG("Tremolo Depth: " + juce::String(newValue) + "% (Internal: " + juce::String(tremoloDepth) + ")");
     });
 }
 
@@ -133,6 +238,20 @@ void MainProcessor::prepareToPlay(double newSampleRate, int samplesPerBlock)
     //enableRamp.prepare(newSampleRate, true, enabled ? 1.f : 0.f);
 
     outputGain.reset(newSampleRate, 0.01f);
+
+    juce::dsp::ProcessSpec lfoSpec; // LFO is mono, but prepare with overall spec
+    lfoSpec.sampleRate = newSampleRate;
+    lfoSpec.maximumBlockSize = static_cast<juce::uint32>(samplesPerBlock);
+    lfoSpec.numChannels = 1; // LFO itself processes mono
+    
+    tremoloLFO.prepare(lfoSpec);
+    tremoloLFO.initialise([](float x){ return std::sin(x); }); // Sine wave LFO
+    // Set initial frequency, force phase reset for consistent start
+    tremoloLFO.setFrequency(tremoloRateHz, true); 
+
+    // Prepare LFO output buffer
+    tremoloLfoOutputBuffer.setSize(1, samplesPerBlock, false, true, false);
+    // (numChannels=1, numSamples=samplesPerBlock, keepExistingContent=false, clearExtraSpace=true, avoidReallocating=false)
 
     parameterManager.updateParameters(true);
 
@@ -180,8 +299,41 @@ void MainProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBu
     for (int ch = 0; ch < static_cast<int>(numChannels); ++ch)
         buffer.addFrom(ch, 0, fxBuffer, ch, 0, static_cast<int>(numSamples));
     
+    // Apply if enabled and depth is significant
+    if (tremoloEffectEnabled && tremoloDepth > 0.001f) 
+    {
+        // Ensure LFO output buffer is correctly sized (should be by prepareToPlay)
+        // but good to assert or check if block size can change dynamically.
+        jassert(tremoloLfoOutputBuffer.getNumSamples() >= numSamples);
+        jassert(tremoloLfoOutputBuffer.getNumChannels() == 1);
+
+        auto* lfoSamples = tremoloLfoOutputBuffer.getWritePointer(0);
+
+        // Generate LFO samples for the block (mono LFO)
+        for (int i = 0; i < numSamples; ++i)
+        {
+            float lfoSampleRaw = tremoloLFO.processSample(0.0f); // LFO outputs ~ -1 to 1
+            lfoSamples[i] = (lfoSampleRaw + 1.0f) * 0.5f;      // Scale to 0 to 1
+        }
+
+        // Apply tremolo gain to each processing channel
+        for (int ch = 0; ch < numChannels; ++ch)
+        {
+            auto* channelData = buffer.getWritePointer(ch);
+            for (int i = 0; i < numSamples; ++i)
+            {
+                // Gain: 1.0 when LFO is at bottom (lfoSamples[i]=0), (1.0 - depth) when LFO is at top (lfoSamples[i]=1)
+                float gain = 1.0f - (tremoloDepth * lfoSamples[i]);
+                channelData[i] *= gain;
+            }
+        }
+    }
+
     // Output gain
     outputGain.applyGain(buffer, buffer.getNumSamples());
+
+    // Tremolo
+    
 
 }
 
