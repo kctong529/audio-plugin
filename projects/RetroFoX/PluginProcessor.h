@@ -95,7 +95,7 @@ namespace Param
         static constexpr float TremoloRateSkw = 0.5f; // Example skew
 
         static constexpr float TremoloDepthMin = 0.0f;
-        static constexpr float TremoloDepthMax = 1.0f; // 0% to 100%
+        static constexpr float TremoloDepthMax = 100.0f; // 0% to 100%
         static constexpr float TremoloDepthInc = 0.01f;
         static constexpr float TremoloDepthSkw = 1.0f; // Linear for depth
 

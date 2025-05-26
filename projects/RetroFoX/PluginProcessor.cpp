@@ -33,12 +33,17 @@ MainProcessor::MainProcessor() :
     parameterManager(*this, ProjectInfo::projectName, Parameters),
     flanger(MaxDelaySizeMs, 2),
     enableRamp(0.05f),
+
     flangerMinOffsetMs(1.0f),       // e.g., minimum average delay for "intense" effect
     flangerMaxOffsetMs(7.0f),       // e.g., maximum average delay for "subtle" effect
     flangerMinDepthMs(0.1f),       // e.g., minimum sweep depth
     flangerMaxDepthMs(5.0f),       // e.g., maximum sweep depth (could be Param::Ranges::DepthMax)
     flangerMinRateHz(0.1f),        // e.g., minimum LFO rate
-    flangerMaxRateHz(2.5f)         // e.g., a moderate maximum LFO rate
+    flangerMaxRateHz(2.0f),         // e.g., a moderate maximum LFO rate
+
+    tremoloEffectEnabled(true), // Default from Parameters vector
+    tremoloRateHz(1.0f),        // Default from Parameters vector
+    tremoloDepth(0.0f / 100.0f) // Default from Parameters (0.0%) scaled to 0.0-1.0
 {
     parameterManager.registerParameterCallback(Param::ID::Enabled,
     [this](float newValue, bool force)
