@@ -8,7 +8,7 @@ namespace Param
 {
     namespace ID
     {   // Enable entire effect
-        static const juce::String Enabled { "enabled" };
+        //static const juce::String Enabled { "enabled" };
 
         // Drive/distortion params
         static const juce::String Drive { "drive" };
@@ -37,7 +37,7 @@ namespace Param
 
     namespace Name
     {
-        static const juce::String Enabled { "Enabled" };
+        //static const juce::String Enabled { "Enabled" };
 
         static const juce::String Drive { "Drive" };
     

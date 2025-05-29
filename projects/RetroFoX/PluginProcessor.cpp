@@ -7,7 +7,7 @@ static const std::vector<mrta::ParameterInfo> Parameters
 {
     
         //{ Param::ID::Enabled,  Param::Name::Enabled,   "Off", "On", true },
-        { Param::ID::Enabled,     Param::Name::Enabled,  Param::Ranges::EnabledOff, Param::Ranges::EnabledOn, true },
+        //{ Param::ID::Enabled,     Param::Name::Enabled,  Param::Ranges::EnabledOff, Param::Ranges::EnabledOn, true },
 
         { Param::ID::Drive,       Param::Name::Drive,     "", 1.f, 1.f, 10.f, 0.1f, 1.f }, // Drive taken from MyFirstRealTimeAudioApp
 
@@ -39,18 +39,18 @@ MainProcessor::MainProcessor() :
     flangerMinDepthMs(0.1f),       // e.g., minimum sweep depth
     flangerMaxDepthMs(5.0f),       // e.g., maximum sweep depth (could be Param::Ranges::DepthMax)
     flangerMinRateHz(0.1f),        // e.g., minimum LFO rate
-    flangerMaxRateHz(2.0f),         // e.g., a moderate maximum LFO rate
+    flangerMaxRateHz(1.0f),         // e.g., a moderate maximum LFO rate
 
     tremoloEffectEnabled(true), // Default from Parameters vector
     tremoloRateHz(1.0f),        // Default from Parameters vector
     tremoloDepth(0.0f / 100.0f) // Default from Parameters (0.0%) scaled to 0.0-1.0
 {
-    parameterManager.registerParameterCallback(Param::ID::Enabled,
-    [this](float newValue, bool force)
-    {
-        enabled = newValue > 0.5f;
-        enableRamp.setTarget(enabled ? 1.f : 0.f, force);
-    });
+    // parameterManager.registerParameterCallback(Param::ID::Enabled,
+    // [this](float newValue, bool force)
+    // {
+    //     enabled = newValue > 0.5f;
+    //     enableRamp.setTarget(enabled ? 1.f : 0.f, force);
+    // });
 
     parameterManager.registerParameterCallback(Param::ID::Drive,
     [this] (float value, bool /*forced*/)
