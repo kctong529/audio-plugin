@@ -33,6 +33,8 @@ namespace Param
         static const juce::String TremoloDepth { "tremolo_depth" };
         static const juce::String TremoloEnabled { "tremolo_enabled"};
 
+        static const juce::String VinylNoise { "vinyl_noise" };
+
     }
 
     namespace Name
@@ -55,11 +57,9 @@ namespace Param
         static const juce::String TremoloRate { "Tremolo Rate" };
         static const juce::String TremoloDepth { "Tremolo Depth" };
         static const juce::String TremoloEnabled { "Tremolo Enabled"};
+
+        static const juce::String VinylNoise { "Vinyl Noise" };
     }
-
-
-
-    
 
     namespace Ranges
     {
@@ -100,6 +100,11 @@ namespace Param
         static constexpr float TremoloDepthSkw = 1.0f; // Linear for depth
 
         static const inline juce::StringArray ModLabelsTremolo { "Sine", "Triangle", "Saw", "Square" }; // Example
+
+        static constexpr float VinylNoiseMin = 0.0f;      // 0%
+        static constexpr float VinylNoiseMax = 100.0f;    // 100%
+        static constexpr float VinylNoiseInc = 1.0f;
+        static constexpr float VinylNoiseSkw = 1.0f;      // Linear
     }
 
 
@@ -167,6 +172,10 @@ private:
     float tremoloDepth { 0.0f };          // Current depth (0.0 to 1.0)
     bool tremoloEffectEnabled { false };  // Is the tremolo effect active?
     juce::AudioBuffer<float> tremoloLfoOutputBuffer; // To store LFO output for the current block
+    
+    juce::Random randomGenerator; // For generating noise
+    juce::dsp::StateVariableFilter::Filter<float> noiseFilter; // For shaping the noise
+    float vinylNoiseLevel { 0.0f }; // 0.0 to 1.0
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainProcessor)
 };
