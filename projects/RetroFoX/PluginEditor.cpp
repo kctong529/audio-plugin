@@ -2,25 +2,37 @@
 #include "PluginEditor.h"
 
 MainProcessorEditor::MainProcessorEditor(MainProcessor& p) :
-    AudioProcessorEditor(&p), audioProcessor(p),
-    genericParameterEditor(audioProcessor.getParameterManager())
+    AudioProcessorEditor(&p),   // Call base class constructor with processor reference
+    audioProcessor(p),
+    customParameterEditor(audioProcessor.getParameterManager()) // Initialize customParameterEditor with parameter manager
 {
-    int height = static_cast<int>(audioProcessor.getParameterManager().getParameters().size())
-               * genericParameterEditor.parameterWidgetHeight;
-    setSize(300, height);
-    addAndMakeVisible(genericParameterEditor);
+    // Set minimum and maximum window size limits for resizing
+    resizeLimits.setSizeLimits(360, 200, 1000, 800);
+
+    // Assign the constrainer to the editor to enforce size limits during resize
+    setConstrainer(&resizeLimits);
+
+    // Allow window to be resizable, both horizontally and vertically
+    setResizable(true, true);
+
+    // Set the initial window size
+    setSize(600, 400);
+
+    // Add the custom parameter editor component and make it visible
+    addAndMakeVisible(customParameterEditor);
 }
 
 MainProcessorEditor::~MainProcessorEditor()
 {
+    // Destructor - default behavior (no special cleanup needed)
 }
 
-void MainProcessorEditor::paint (juce::Graphics& g)
+void MainProcessorEditor::paint(juce::Graphics& g)
 {
-    g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 }
 
 void MainProcessorEditor::resized()
 {
-    genericParameterEditor.setBounds(getLocalBounds());
+    // Make the custom parameter editor fill the entire window
+    customParameterEditor.setBounds(getLocalBounds());
 }
