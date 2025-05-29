@@ -45,7 +45,6 @@ set(company_copyright "Modern Real-Time Audio Oy")
 set(company_code "Mrta")
 set(company_bundle_id "com.ModernRealTimeAudio")
 
-
 # This function adds a JUCE plugin target to this project
 # Arguments:
 #   - TARGET: The name of your plugin target, this allows you to identify which of your plugins will be built.
@@ -74,26 +73,21 @@ function(add_plugin target)
     #message(STATUS "  INCLUDE_DIRS: ${AP_INCLUDE_DIRS}")
 
     # Add juce plugin target
-    set(AP_PLUGIN_NAME "Subtractive Synthesizer")  # Set this to your plugin's name
-    message(STATUS "PLUGIN_NAME: ${AP_PLUGIN_NAME}")  # This will show the plugin name in the terminal
     juce_add_plugin(${target}
         PRODUCT_NAME ${AP_PROD_NAME}
         VERSION ${AP_VERSION}
         MICROPHONE_PERMISSION_ENABLED TRUE
         COMPANY_COPYRIGHT ${company_copyright}
         COMPANY_NAME ${company_name}
-        FORMATS VST3 AU Standalone
+        FORMATS Standalone VST3 AU Standalone
         PLUGIN_NAME ${AP_PLUGIN_NAME}
         PLUGIN_MANUFACTURER_CODE ${company_code}
         PLUGIN_CODE ${AP_PROD_CODE}
         BUNDLE_ID ${company_bundle_id}.${AP_PROD_NAME}
-        IS_SYNTH FALSE
-        NEEDS_MIDI_INPUT FALSE
+        IS_SYNTH ${AP_SYNTH}
+        NEEDS_MIDI_INPUT ${AP_SYNTH}
         NEEDS_MIDI_OUTPUT FALSE
-        COPY_PLUGIN_AFTER_BUILD TRUE
-        
-        PLUGIN_CHANNEL_CONFIGURATIONS "2-2"
-    )
+        COPY_PLUGIN_AFTER_BUILD TRUE)
     juce_generate_juce_header(${target})
 
     target_sources(${target}
@@ -135,190 +129,224 @@ endfunction(add_plugin)
 set(dsp_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/DSP)
 set(gui_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/GUI)
 
-# add example project
-set(mfrtaa_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/MyFirstRealTimeAudioApp)
+# # add example project
+# set(mfrtaa_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/MyFirstRealTimeAudioApp)
 
-add_plugin(mfrtaa
+# add_plugin(mfrtaa
+#     VERSION 0.1.0
+#     PLUGIN_NAME "My First RT Audio App"
+#     PROD_NAME MyFirstRTAudioApp
+#     PROD_CODE Rtap
+#     SYNTH FALSE
+#     SOURCES
+#         ${mfrtaa_source}/PluginEditor.cpp
+#         ${mfrtaa_source}/PluginProcessor.cpp
+#     INCLUDE_DIRS
+#         ${mfrtaa_source})
+
+# # ring mod project
+# set(ringmod_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/RingModulator)
+
+# add_plugin(ringmod
+#     VERSION 0.1.0
+#     PLUGIN_NAME "Ring Modulator"
+#     PROD_NAME RingModulator
+#     PROD_CODE Rmod
+#     SYNTH FALSE
+#     SOURCES
+#         ${ringmod_source}/PluginEditor.cpp
+#         ${ringmod_source}/PluginProcessor.cpp
+#         ${dsp_source}/RingMod.cpp
+#     INCLUDE_DIRS
+#         ${dsp_source}
+#         ${ringmod_source})
+
+# # parametric eq project
+# set(parameq_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/ParametricEQ)
+
+# add_plugin(parameq
+#     VERSION 0.1.0
+#     PLUGIN_NAME "Parametric EQ"
+#     PROD_NAME ParametricEQ
+#     PROD_CODE Pmeq
+#     SYNTH FALSE
+#     SOURCES
+#         ${parameq_source}/PluginEditor.cpp
+#         ${parameq_source}/PluginProcessor.cpp
+#         ${dsp_source}/Biquad.cpp
+#         ${dsp_source}/ParametricEqualizer.cpp
+#         ${gui_source}/MrtaLAF.cpp
+#     INCLUDE_DIRS
+#         ${gui_source}
+#         ${dsp_source}
+#         ${ringmod_source})
+
+# # flanger project
+# set(flanger_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/Flanger)
+
+# add_plugin(flanger
+#     VERSION 0.1.0
+#     PLUGIN_NAME "Flanger"
+#     PROD_NAME Flanger
+#     PROD_CODE Flng
+#     SYNTH FALSE
+#     SOURCES
+#         ${flanger_source}/PluginEditor.cpp
+#         ${flanger_source}/PluginProcessor.cpp
+#         ${dsp_source}/DelayLine.cpp
+#         ${dsp_source}/Flanger.cpp
+#     INCLUDE_DIRS
+#         ${dsp_source}
+#         ${flanger_source})
+
+# # delay project
+# set(delay_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/Delay)
+
+# add_plugin(delay
+#     VERSION 0.1.0
+#     PLUGIN_NAME "Delay"
+#     PROD_NAME Delay
+#     PROD_CODE Dlay
+#     SYNTH FALSE
+#     SOURCES
+#         ${delay_source}/PluginEditor.cpp
+#         ${delay_source}/PluginProcessor.cpp
+#         ${dsp_source}/DelayLine.cpp
+#         ${dsp_source}/Delay.cpp
+#         ${dsp_source}/Biquad.cpp
+#         ${dsp_source}/ParametricEqualizer.cpp
+#         ${dsp_source}/Meter.cpp
+#         ${gui_source}/MeterComponent.cpp
+#         ${gui_source}/MrtaLAF.cpp
+#     INCLUDE_DIRS
+#         ${dsp_source}
+#         ${gui_source}
+#         ${delay_source})
+
+# # osc project
+# set(osc_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/Oscillators)
+
+# add_plugin(osc
+#     VERSION 0.1.0
+#     PLUGIN_NAME "Oscillators"
+#     PROD_NAME Oscillators
+#     PROD_CODE Oscs
+#     SYNTH FALSE
+#     SOURCES
+#         ${osc_source}/PluginEditor.cpp
+#         ${osc_source}/PluginProcessor.cpp
+#         ${dsp_source}/Oscillator.cpp
+#     INCLUDE_DIRS
+#         ${dsp_source}
+#         ${osc_source})
+
+# # midi handling project
+# set(midi_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/MidiHandler)
+
+# add_plugin(midi
+#     VERSION 0.1.0
+#     PLUGIN_NAME "Midi Handler"
+#     PROD_NAME MidiHandler
+#     PROD_CODE Mdhd
+#     SYNTH TRUE
+#     SOURCES
+#         ${midi_source}/PluginEditor.cpp
+#         ${midi_source}/PluginProcessor.cpp
+#         ${dsp_source}/SynthVoice.cpp
+#         ${dsp_source}/Oscillator.cpp
+#     INCLUDE_DIRS
+#         ${dsp_source}
+#         ${midi_source})
+
+# # envelope generator project
+# set(envgen_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/EnvelopeGenerator)
+
+# add_plugin(envgen
+#     VERSION 0.1.0
+#     PLUGIN_NAME "Envelope Generator"
+#     PROD_NAME EnvelopeGenerator
+#     PROD_CODE Egen
+#     SYNTH FALSE
+#     SOURCES
+#         ${envgen_source}/PluginEditor.cpp
+#         ${envgen_source}/PluginProcessor.cpp
+#         ${dsp_source}/EnvelopeGenerator.cpp
+#     INCLUDE_DIRS
+#         ${dsp_source}
+#         ${envgen_source})
+
+# # state variable filter project
+# set(svf_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/StateVariableFilter)
+
+# add_plugin(svf
+#     VERSION 0.1.0
+#     PLUGIN_NAME "State Variable Filter"
+#     PROD_NAME StateVariableFilter
+#     PROD_CODE Svff
+#     SYNTH FALSE
+#     SOURCES
+#         ${svf_source}/PluginEditor.cpp
+#         ${svf_source}/PluginProcessor.cpp
+#         ${dsp_source}/StateVariableFilter.cpp
+#         ${dsp_source}/Oscillator.cpp
+#     INCLUDE_DIRS
+#         ${dsp_source}
+#         ${svf_source})
+
+# # mono synth project
+# set(synth ${CMAKE_CURRENT_SOURCE_DIR}/projects/Synth)
+
+# add_plugin(synth
+#     VERSION 0.1.0
+#     PLUGIN_NAME "Synth"
+#     PROD_NAME Synth
+#     PROD_CODE Syth
+#     SYNTH TRUE
+#     SOURCES
+#         ${synth}/PluginEditor.cpp
+#         ${synth}/PluginProcessor.cpp
+#         ${dsp_source}/Synth.cpp
+#         ${dsp_source}/Oscillator.cpp
+#         ${dsp_source}/EnvelopeGenerator.cpp
+#         ${dsp_source}/StateVariableFilter.cpp
+#     INCLUDE_DIRS
+#         ${gui_source}
+#         ${dsp_source}
+#         ${synth})
+
+# homework 3 plugin template
+# set(amp_model_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/AmpModel)
+
+# add_plugin(amp_model
+#     VERSION 0.1.0
+#     PLUGIN_NAME "Amp Model"
+#     PROD_NAME AmpModel
+#     PROD_CODE AmpM
+#     SYNTH FALSE
+#     SOURCES
+#         ${amp_model_source}/PluginEditor.cpp
+#         ${amp_model_source}/PluginProcessor.cpp
+#         ${amp_model_source}/AmpGruParameters.cpp
+#     INCLUDE_DIRS
+#         ${gui_source}
+#         ${dsp_source}
+#         ${amp_model_source})
+
+set(retrofox_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/RetroFoX)
+
+add_plugin(retrofox
     VERSION 0.1.0
-    PLUGIN_NAME "My First RT Audio App"
-    PROD_NAME MyFirstRTAudioApp
-    PROD_CODE Rtap
+    PLUGIN_NAME "RetroFoX"
+    PROD_NAME RetroFoX
+    PROD_CODE RtFX
     SYNTH FALSE
+    EFFECT TRUE
     SOURCES
-        ${mfrtaa_source}/PluginEditor.cpp
-        ${mfrtaa_source}/PluginProcessor.cpp
+        ${retrofox_source}/PluginEditor.cpp
+        ${retrofox_source}/PluginProcessor.cpp
+        ${retrofox_source}/Flanger.cpp
+        ${retrofox_source}/DelayLine.cpp
+        ${retrofox_source}/Bitcrusher.cpp
+
     INCLUDE_DIRS
-        ${mfrtaa_source})
-
-# ring mod project
-set(ringmod_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/RingModulator)
-
-add_plugin(ringmod
-    VERSION 0.1.0
-    PLUGIN_NAME "Ring Modulator"
-    PROD_NAME RingModulator
-    PROD_CODE Rmod
-    SYNTH FALSE
-    SOURCES
-        ${ringmod_source}/PluginEditor.cpp
-        ${ringmod_source}/PluginProcessor.cpp
-        ${dsp_source}/RingMod.cpp
-    INCLUDE_DIRS
-        ${dsp_source}
-        ${ringmod_source})
-
-# parametric eq project
-set(parameq_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/ParametricEQ)
-
-add_plugin(parameq
-    VERSION 0.1.0
-    PLUGIN_NAME "Parametric EQ"
-    PROD_NAME ParametricEQ
-    PROD_CODE Pmeq
-    SYNTH FALSE
-    SOURCES
-        ${parameq_source}/PluginEditor.cpp
-        ${parameq_source}/PluginProcessor.cpp
-        ${dsp_source}/Biquad.cpp
-        ${dsp_source}/ParametricEqualizer.cpp
-        ${gui_source}/MrtaLAF.cpp
-    INCLUDE_DIRS
-        ${gui_source}
-        ${dsp_source}
-        ${ringmod_source})
-
-# flanger project
-set(flanger_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/Flanger)
-
-add_plugin(flanger
-    VERSION 0.1.0
-    PLUGIN_NAME "Flanger"
-    PROD_NAME Flanger
-    PROD_CODE Flng
-    SYNTH FALSE
-    SOURCES
-        ${flanger_source}/PluginEditor.cpp
-        ${flanger_source}/PluginProcessor.cpp
-        ${dsp_source}/DelayLine.cpp
-        ${dsp_source}/Flanger.cpp
-    INCLUDE_DIRS
-        ${dsp_source}
-        ${flanger_source})
-
-# delay project
-set(delay_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/Delay)
-
-add_plugin(delay
-    VERSION 0.1.0
-    PLUGIN_NAME "Delay"
-    PROD_NAME Delay
-    PROD_CODE Dlay
-    SYNTH FALSE
-    SOURCES
-        ${delay_source}/PluginEditor.cpp
-        ${delay_source}/PluginProcessor.cpp
-        ${dsp_source}/DelayLine.cpp
-        ${dsp_source}/Delay.cpp
-        ${dsp_source}/Biquad.cpp
-        ${dsp_source}/ParametricEqualizer.cpp
-        ${dsp_source}/Meter.cpp
-        ${gui_source}/MeterComponent.cpp
-        ${gui_source}/MrtaLAF.cpp
-    INCLUDE_DIRS
-        ${dsp_source}
-        ${gui_source}
-        ${delay_source})
-
-# osc project
-set(osc_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/Oscillators)
-
-add_plugin(osc
-    VERSION 0.1.0
-    PLUGIN_NAME "Oscillators"
-    PROD_NAME Oscillators
-    PROD_CODE Oscs
-    SYNTH FALSE
-    SOURCES
-        ${osc_source}/PluginEditor.cpp
-        ${osc_source}/PluginProcessor.cpp
-        ${dsp_source}/Oscillator.cpp
-    INCLUDE_DIRS
-        ${dsp_source}
-        ${osc_source})
-
-# midi handling project
-set(midi_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/MidiHandler)
-
-add_plugin(midi
-    VERSION 0.1.0
-    PLUGIN_NAME "Midi Handler"
-    PROD_NAME MidiHandler
-    PROD_CODE Mdhd
-    SYNTH TRUE
-    SOURCES
-        ${midi_source}/PluginEditor.cpp
-        ${midi_source}/PluginProcessor.cpp
-        ${dsp_source}/SynthVoice.cpp
-        ${dsp_source}/Oscillator.cpp
-    INCLUDE_DIRS
-        ${dsp_source}
-        ${midi_source})
-
-# envelope generator project
-set(envgen_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/EnvelopeGenerator)
-
-add_plugin(envgen
-    VERSION 0.1.0
-    PLUGIN_NAME "Envelope Generator"
-    PROD_NAME EnvelopeGenerator
-    PROD_CODE Egen
-    SYNTH FALSE
-    SOURCES
-        ${envgen_source}/PluginEditor.cpp
-        ${envgen_source}/PluginProcessor.cpp
-        ${dsp_source}/EnvelopeGenerator.cpp
-    INCLUDE_DIRS
-        ${dsp_source}
-        ${envgen_source})
-
-# state variable filter project
-set(svf_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/StateVariableFilter)
-
-add_plugin(svf
-    VERSION 0.1.0
-    PLUGIN_NAME "State Variable Filter"
-    PROD_NAME StateVariableFilter
-    PROD_CODE Svff
-    SYNTH FALSE
-    SOURCES
-        ${svf_source}/PluginEditor.cpp
-        ${svf_source}/PluginProcessor.cpp
-        ${dsp_source}/StateVariableFilter.cpp
-        ${dsp_source}/Oscillator.cpp
-    INCLUDE_DIRS
-        ${dsp_source}
-        ${svf_source})
-
-# state variable filter project
-set(subsynth_source ${CMAKE_CURRENT_SOURCE_DIR}/projects/SubtractiveSynthesizer)
-
-add_plugin(subsynth
-    VERSION 0.1.0
-    PLUGIN_NAME "Subtractive Synthesizer"
-    PROD_NAME SubtractiveSynth
-    PROD_CODE Ssyn
-    SYNTH TRUE
-    IS_SYNTH TRUE
-    NEEDS_MIDI_INPUT TRUE
-    NEEDS_MIDI_OUTPUT FALSE
-    EDITOR_WANTS_KEYBOARD_FOCUS TRUE
-    PLUGIN_MANUFACTURER_CODE Juce
-    PLUGIN_CODE subsynthh
-    FORMATS VST3
-    SOURCES
-        ${subsynth_source}/PluginEditor.cpp
-        ${subsynth_source}/PluginProcessor.cpp
-        ${subsynth_source}/Oscillator.cpp
-        ${subsynth_source}/StateVariableFilter.cpp
-    INCLUDE_DIRS
-        ${subsynth_source})
+        ${retrofox_source})
