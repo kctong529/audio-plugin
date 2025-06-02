@@ -11,13 +11,11 @@ static const std::vector<mrta::ParameterInfo> Parameters
 
         { Param::ID::Drive,            Param::Name::Drive,     "", 1.f, 1.f, 10.f, 0.1f, 1.f }, // Drive taken from MyFirstRealTimeAudioApp
 
+        { Param::ID::PitchWobbleIntensity, Param::Name::PitchWobbleIntensity, "%", Param::Ranges::PitchWobbleIntensityMin, /*default val*/ Param::Ranges::PitchWobbleIntensityMin, Param::Ranges::PitchWobbleIntensityMax, Param::Ranges::PitchWobbleIntensityInc, Param::Ranges::PitchWobbleIntensitySkw },
+
         { Param::ID::BitDepth,         Param::Name::BitDepth,     "bits", 16.f, 1.f, 24.f, 1.f, 1.f }, // 1-24 bits, default 16.
         { Param::ID::RateReduce,       Param::Name::RateReduce,     "x", 1.f, 1.f, 64.f, 1.f, 2.f }, // 1x to 64x downsampling factor, default 1.
 
-        // Flanger based on course Flanger project
-        // { Param::ID::Offset,      Param::Name::Offset,   "ms",  2.f,  Param::Ranges::OffsetMin,   Param::Ranges::OffsetMax,   Param::Ranges::OffsetInc,   Param::Ranges::OffsetSkw },
-        // { Param::ID::Depth,       Param::Name::Depth,    "ms",  2.f,  Param::Ranges::DepthMin,    Param::Ranges::DepthMax,    Param::Ranges::DepthInc,    Param::Ranges::DepthSkw },
-        // { Param::ID::Rate,        Param::Name::Rate,     "Hz",  0.5f, Param::Ranges::RateMin,     Param::Ranges::RateMax,     Param::Ranges::RateInc,     Param::Ranges::RateSkw },
         // { Param::ID::ModType,     Param::Name::ModType,  Param::Ranges::ModLabels, 0 },
         { Param::ID::FlangerIntensity, Param::Name::FlangerIntensity, "%", 0.0f, Param::Ranges::FlangerIntensityMin, Param::Ranges::FlangerIntensityMax, Param::Ranges::FlangerIntensityInc, Param::Ranges::FlangerIntensitySkw },
     
@@ -49,18 +47,39 @@ MainProcessor::MainProcessor() :
     vinylNoiseLevel(0.0f) // <<< NEW: Initialize vinylNoiseLevel
 
 {
-    // parameterManager.registerParameterCallback(Param::ID::Enabled,
-    // [this](float newValue, bool force)
-    // {
-    //     enabled = newValue > 0.5f;
-    //     enableRamp.setTarget(enabled ? 1.f : 0.f, force);
-    // });
-
     parameterManager.registerParameterCallback(Param::ID::Drive,
     [this] (float value, bool /*forced*/)
     {
         DBG(Param::Name::Drive + ": " + juce::String { value });
         filter.setDrive(value);
+    });
+
+    parameterManager.registerParameterCallback(Param::ID::PitchWobbleIntensity,
+    [this](float newValue, bool /*force*/)
+    {
+        // newValue is 0-100 from the parameter definition
+        currentPitchWobbleIntensity = newValue / Param::Ranges::PitchWobbleIntensityMax; // Scale to 0.0 - 1.0
+        currentPitchWobbleIntensity = std::max(0.0f, std::min(currentPitchWobbleIntensity, 1.0f)); // Clamp
+
+        float lfoRate = PITCH_WOBBLE_MIN_RATE_HZ; // Default to min rate if intensity is effectively zero
+        if (currentPitchWobbleIntensity > 0.001f) // Only map rate if intensity is active
+        {
+            // Linearly map intensity (0-1) to LFO rate range
+            lfoRate = juce::jmap(currentPitchWobbleIntensity,
+                                 PITCH_WOBBLE_MIN_RATE_HZ,
+                                 PITCH_WOBBLE_MAX_RATE_HZ);
+        }
+
+        if (getSampleRate() > 0) // Ensure LFO is prepared before setting frequency
+        {
+            pitchWobbleLFO.setFrequency(lfoRate);
+        }
+        // The actual modulation depth (PITCH_WOBBLE_MAX_MOD_DEPTH_MS * currentPitchWobbleIntensity)
+        // is applied per-sample in processBlock, using the LFO's output.
+
+        DBG(Param::Name::PitchWobbleIntensity + ": " + juce::String(newValue) + "% "
+            + "(InternalNorm: " + juce::String(currentPitchWobbleIntensity, 2) + "), "
+            + "LFO Rate set to: " + juce::String(lfoRate, 2) + " Hz");
     });
 
      parameterManager.registerParameterCallback(Param::ID::BitDepth,
@@ -78,30 +97,6 @@ MainProcessor::MainProcessor() :
 
     });
 
-    // parameterManager.registerParameterCallback(Param::ID::Offset,
-    // [this] (float newValue, bool /*force*/)
-    // {
-    //     flanger.setOffset(newValue);
-    // });
-
-    // parameterManager.registerParameterCallback(Param::ID::Depth,
-    // [this](float newValue, bool /*force*/)
-    // {
-    //     flanger.setDepth(newValue);
-    // });
-
-    // parameterManager.registerParameterCallback(Param::ID::Rate,
-    // [this] (float newValue, bool /*force*/)
-    // {
-    //     flanger.setModulationRate(newValue);
-    // });
-
-    // parameterManager.registerParameterCallback(Param::ID::ModType,
-    // [this](float newValue, bool /*force*/)
-    // {
-    //     DSP::Flanger::ModulationType modType = static_cast<DSP::Flanger::ModulationType>(std::round(newValue));
-    //     flanger.setModulationType(std::min(std::max(modType, DSP::Flanger::Sin), DSP::Flanger::Tri));
-    // });
      parameterManager.registerParameterCallback(Param::ID::FlangerIntensity,
     [this](float newValue, bool /*force*/)
     {
@@ -244,16 +239,20 @@ void MainProcessor::prepareToPlay(double newSampleRate, int samplesPerBlock)
     // The drive will be set by the parameter callback when updateParameters(true) is called below.
     // Or you could set a default initial drive here: filter.setDrive(1.0f);
 
+    // Bitcrusher
     bitCrusher.prepare(newSampleRate, samplesPerBlock); // Call your custom class's method
 
+    // Flanger
     flanger.prepare(newSampleRate, MaxDelaySizeMs, numChannels);
     enableRamp.prepare(newSampleRate, true, enabled ? 1.f : 0.f);
     //filter.prepare({ newSampleRate, static_cast<juce::uint32>(samplesPerBlock), numChannels });
     //flanger.prepare(newSampleRate, MaxDelaySizeMs, numChannels);
     //enableRamp.prepare(newSampleRate, true, enabled ? 1.f : 0.f);
 
+    // Post Gain
     outputGain.reset(newSampleRate, 0.01f);
 
+    // Tremolo
     juce::dsp::ProcessSpec lfoSpec; // LFO is mono, but prepare with overall spec
     lfoSpec.sampleRate = newSampleRate;
     lfoSpec.maximumBlockSize = static_cast<juce::uint32>(samplesPerBlock);
@@ -268,6 +267,7 @@ void MainProcessor::prepareToPlay(double newSampleRate, int samplesPerBlock)
     tremoloLfoOutputBuffer.setSize(1, samplesPerBlock, false, true, false);
     // (numChannels=1, numSamples=samplesPerBlock, keepExistingContent=false, clearExtraSpace=true, avoidReallocating=false)
 
+    // Vinyl noise
     juce::dsp::ProcessSpec noiseFilterSpec;
     noiseFilterSpec.sampleRate = newSampleRate;
     noiseFilterSpec.maximumBlockSize = static_cast<juce::uint32>(samplesPerBlock);
@@ -279,6 +279,35 @@ void MainProcessor::prepareToPlay(double newSampleRate, int samplesPerBlock)
     noiseFilter.parameters->type = juce::dsp::StateVariableFilter::Parameters<float>::Type::lowPass;
     noiseFilter.parameters->setCutOffFrequency(newSampleRate, 3000.0f, static_cast<float>(1.0 / std::sqrt(2.0))); // Cutoff 3kHz, Q ~0.707
 
+    // Pitch Wobble
+    juce::dsp::ProcessSpec pitchWobbleLfoSpec;
+    pitchWobbleLfoSpec.sampleRate = newSampleRate;
+    pitchWobbleLfoSpec.maximumBlockSize = static_cast<juce::uint32>(samplesPerBlock);
+    pitchWobbleLfoSpec.numChannels = 1; // Mono LFO
+
+    pitchWobbleLFO.prepare(pitchWobbleLfoSpec);
+    // >>> MODIFIED - Correct LFO initialisation for full cycle
+    pitchWobbleLFO.initialise([](float x) { return std::sin(x * juce::MathConstants<float>::twoPi); }); 
+    // Initial frequency will be set by parameterManager.updateParameters(true) below
+
+    pitchWobbleDelayLines.resize(numChannels);
+    juce::dsp::ProcessSpec monoDelaySpec; // Spec for each individual mono delay line
+    monoDelaySpec.sampleRate = newSampleRate;
+    monoDelaySpec.maximumBlockSize = static_cast<juce::uint32>(samplesPerBlock);
+    monoDelaySpec.numChannels = 1; // Each dsp::DelayLine is mono
+
+    float maxTotalDelayMs = PITCH_WOBBLE_CENTRAL_DELAY_MS + PITCH_WOBBLE_MAX_MOD_DEPTH_MS + 5.0f; // +5ms safety margin
+    int maxDelaySamples = static_cast<int>(std::ceil(maxTotalDelayMs / 1000.0f * newSampleRate));
+    maxDelaySamples = std::max(maxDelaySamples, samplesPerBlock); // Ensure it can hold at least one block if maxTotalDelayMs is very short
+
+    for (unsigned int ch = 0; ch < numChannels; ++ch)
+    {
+        pitchWobbleDelayLines[ch].prepare(monoDelaySpec);
+        pitchWobbleDelayLines[ch].setMaximumDelayInSamples(maxDelaySamples);
+        pitchWobbleDelayLines[ch].reset();
+    }
+
+    // Update parameters, set and clear fx buffer
     parameterManager.updateParameters(true);
 
     fxBuffer.setSize(static_cast<int>(numChannels), samplesPerBlock);
@@ -290,6 +319,14 @@ void MainProcessor::releaseResources()
     filter.reset();
     bitCrusher.reset();
     flanger.clear();
+    pitchWobbleLFO.reset();
+    for (auto& delayLine : pitchWobbleDelayLines)
+    {
+        delayLine.reset();
+    }
+    pitchWobbleDelayLines.clear();
+    tremoloLFO.reset(); 
+    noiseFilter.reset();
 }
 
 void MainProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& /*midiMessages*/)
@@ -299,6 +336,8 @@ void MainProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBu
 
     const unsigned int numChannels { static_cast<unsigned int>(buffer.getNumChannels()) };
     const unsigned int numSamples { static_cast<unsigned int>(buffer.getNumSamples()) };
+    const float sampleRate = static_cast<float>(getSampleRate());
+
 
     // Drive (via filter)
     {
@@ -325,6 +364,7 @@ void MainProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBu
     for (int ch = 0; ch < static_cast<int>(numChannels); ++ch)
         buffer.addFrom(ch, 0, fxBuffer, ch, 0, static_cast<int>(numSamples));
     
+    // Tremolo
     // Apply if enabled and depth is significant
     if (tremoloEffectEnabled && tremoloDepth > 0.001f) 
     {
@@ -355,6 +395,51 @@ void MainProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBu
         }
     }
 
+    // Pitch wobble
+    if (currentPitchWobbleIntensity > 0.001f && 
+        pitchWobbleDelayLines.size() == numChannels && 
+        sampleRate > 0.0f)
+    {
+        // Effective modulation depth in milliseconds for the current intensity
+        const float currentMaxDelaySwingMs = currentPitchWobbleIntensity * PITCH_WOBBLE_MAX_MOD_DEPTH_MS;
+
+        for (unsigned int s = 0; s < numSamples; ++s)
+        {
+            // Get LFO sample (advances LFO phase)
+            float lfoValue = pitchWobbleLFO.processSample(0.0f); // Output is ~ -1 to 1 for sine
+
+            // Calculate the delay offset in milliseconds based on LFO and current max swing
+            float delayOffsetMs = lfoValue * currentMaxDelaySwingMs;
+
+            for (unsigned int ch = 0; ch < numChannels; ++ch)
+            {
+                auto& delayLine = pitchWobbleDelayLines[ch];
+                float* channelData = buffer.getWritePointer(static_cast<int>(ch));
+                float inputSample = channelData[s]; // Read current sample from buffer
+
+                // Push current input sample into its respective delay line
+                // 'channel' arg for pushSample/popSample on an individual dsp::DelayLine is 0
+                delayLine.pushSample(0, inputSample);
+
+                // Calculate total target delay for this channel and sample in milliseconds
+                float targetDelayMs = PITCH_WOBBLE_CENTRAL_DELAY_MS + delayOffsetMs;
+
+                // Clamp targetDelayMs to a safe minimum (e.g., 0.1 ms or 1 sample time)
+                const float minDelayMs = std::max(0.1f, (1.0f / sampleRate) * 1000.0f); 
+                targetDelayMs = std::max(minDelayMs, targetDelayMs);
+                
+                // Convert delay from ms to samples for the popSample method
+                float delayInSamples = targetDelayMs * sampleRate / 1000.0f;
+                
+                // Pop the delayed sample (interpolated)
+                float delayedSample = delayLine.popSample(0, delayInSamples, true /*interpolate*/);
+
+                // Write the delayed sample back to the buffer
+                channelData[s] = delayedSample;
+            }
+        }
+    }
+
     // Vinyl noise
     if(vinylNoiseLevel > 0.001f){
         for(int sample = 0; sample < numSamples; ++sample){
@@ -366,17 +451,14 @@ void MainProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBu
             for(int ch = 0; ch < numChannels; ++ch){
                 buffer.addSample(ch, sample, noiseSample);
             }
-        #if JUCE_DSP_ENABLE_SNAP_TO_ZERO // As seen in the filter's processBlock
-        noiseFilter.snapToZero();       // Good practice if processing sample-by-sample
-       #endif
         }
-
+        #if JUCE_DSP_ENABLE_SNAP_TO_ZERO 
+        if (numSamples > 0) // Only snap if processed samples
+            noiseFilter.snapToZero(); 
+        #endif
+    }
     // Output gain
     outputGain.applyGain(buffer, buffer.getNumSamples());
-
-    // Tremolo
-    
-    }
 }
 
 void MainProcessor::getStateInformation(juce::MemoryBlock& destData)
