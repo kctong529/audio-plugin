@@ -11,7 +11,7 @@ CustomParameterEditor::CustomParameterEditor(mrta::ParameterManager& pm)
     {
         // Create and configure a label displaying the parameter ID
         auto label = std::make_unique<juce::Label>();
-        label->setText(param.ID, juce::dontSendNotification);
+        label->setText(param.name, juce::dontSendNotification);
         label->setJustificationType(juce::Justification::centred);
         label->setColour(juce::Label::textColourId, juce::Colours::saddlebrown);
 
