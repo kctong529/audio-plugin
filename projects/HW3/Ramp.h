@@ -152,17 +152,6 @@ public:
         }
     }
 
-    float getNext()
-    {
-        const F targetDelta { std::fabs(targetValue - currentValue) };
-        if ((targetDelta > std::fabs(static_cast<F>(2) * rampStep)) && (std::fabs(rampStep) > minDelta))
-            currentValue += rampStep;
-        else
-            currentValue = targetValue;
-
-        return currentValue;
-    }
-
     // Minimum ramp time in secondes
     static constexpr F minRampTime { static_cast<F>(1e-3) }; // 1ms
 
