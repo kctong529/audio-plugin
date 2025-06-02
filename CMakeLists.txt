@@ -342,6 +342,7 @@ add_plugin(retrofox
     SYNTH FALSE
     EFFECT TRUE
     SOURCES
+        ${retrofox_source}/CustomParameterEditor.cpp
         ${retrofox_source}/PluginEditor.cpp
         ${retrofox_source}/PluginProcessor.cpp
         ${retrofox_source}/Flanger.cpp

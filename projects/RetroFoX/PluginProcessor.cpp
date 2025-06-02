@@ -47,6 +47,13 @@ MainProcessor::MainProcessor() :
     vinylNoiseLevel(0.0f) // <<< NEW: Initialize vinylNoiseLevel
 
 {
+    // parameterManager.registerParameterCallback(Param::ID::Enabled,
+    // [this](float newValue, bool force)
+    // {
+    //     enabled = newValue > 0.5f;
+    //     enableRamp.setTarget(enabled ? 1.f : 0.f, force);
+    // });
+
     parameterManager.registerParameterCallback(Param::ID::Drive,
     [this] (float value, bool /*forced*/)
     {
@@ -97,6 +104,30 @@ MainProcessor::MainProcessor() :
 
     });
 
+    // parameterManager.registerParameterCallback(Param::ID::Offset,
+    // [this] (float newValue, bool /*force*/)
+    // {
+    //     flanger.setOffset(newValue);
+    // });
+
+    // parameterManager.registerParameterCallback(Param::ID::Depth,
+    // [this](float newValue, bool /*force*/)
+    // {
+    //     flanger.setDepth(newValue);
+    // });
+
+    // parameterManager.registerParameterCallback(Param::ID::Rate,
+    // [this] (float newValue, bool /*force*/)
+    // {
+    //     flanger.setModulationRate(newValue);
+    // });
+
+    // parameterManager.registerParameterCallback(Param::ID::ModType,
+    // [this](float newValue, bool /*force*/)
+    // {
+    //     DSP::Flanger::ModulationType modType = static_cast<DSP::Flanger::ModulationType>(std::round(newValue));
+    //     flanger.setModulationType(std::min(std::max(modType, DSP::Flanger::Sin), DSP::Flanger::Tri));
+    // });
      parameterManager.registerParameterCallback(Param::ID::FlangerIntensity,
     [this](float newValue, bool /*force*/)
     {
