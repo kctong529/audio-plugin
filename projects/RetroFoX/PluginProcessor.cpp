@@ -5,27 +5,16 @@
 
 static const std::vector<mrta::ParameterInfo> Parameters
 {
-    
-        //{ Param::ID::Enabled,  Param::Name::Enabled,   "Off", "On", true },
-        //{ Param::ID::Enabled,     Param::Name::Enabled,  Param::Ranges::EnabledOff, Param::Ranges::EnabledOn, true },
-
-        { Param::ID::Drive,            Param::Name::Drive,     "", 1.f, 1.f, 10.f, 0.1f, 1.f }, // Drive taken from MyFirstRealTimeAudioApp
-
-        { Param::ID::PitchWobbleIntensity, Param::Name::PitchWobbleIntensity, "%", Param::Ranges::PitchWobbleIntensityMin, /*default val*/ Param::Ranges::PitchWobbleIntensityMin, Param::Ranges::PitchWobbleIntensityMax, Param::Ranges::PitchWobbleIntensityInc, Param::Ranges::PitchWobbleIntensitySkw },
-
-        { Param::ID::BitDepth,         Param::Name::BitDepth,     "bits", 16.f, 1.f, 24.f, 1.f, 1.f }, // 1-24 bits, default 16.
-        { Param::ID::RateReduce,       Param::Name::RateReduce,     "x", 1.f, 1.f, 64.f, 1.f, 2.f }, // 1x to 64x downsampling factor, default 1.
-
-        // { Param::ID::ModType,     Param::Name::ModType,  Param::Ranges::ModLabels, 0 },
-        { Param::ID::FlangerIntensity, Param::Name::FlangerIntensity, "%", 0.0f, Param::Ranges::FlangerIntensityMin, Param::Ranges::FlangerIntensityMax, Param::Ranges::FlangerIntensityInc, Param::Ranges::FlangerIntensitySkw },
-    
-        { Param::ID::PostGain,         Param::Name::PostGain,  "dB", 0.0f, -60.f, 12.f, 0.1f, 3.8018f },
-
-        { Param::ID::TremoloEnabled,   Param::Name::TremoloEnabled, Param::Ranges::EnabledOff, Param::Ranges::EnabledOn, true },
-        { Param::ID::TremoloRate,      Param::Name::TremoloRate, "Hz", 1.0f, Param::Ranges::TremoloRateMin, Param::Ranges::TremoloRateMax, Param::Ranges::TremoloRateInc, Param::Ranges::TremoloRateSkw },
-        { Param::ID::TremoloDepth,     Param::Name::TremoloDepth, "%", 0.0f, Param::Ranges::TremoloDepthMin, Param::Ranges::TremoloDepthMax, Param::Ranges::TremoloDepthInc, Param::Ranges::TremoloDepthSkw },
-        
-        { Param::ID::VinylNoise,       Param::Name::VinylNoise, "%", 0.0f, Param::Ranges::VinylNoiseMin, Param::Ranges::VinylNoiseMax, Param::Ranges::VinylNoiseInc, Param::Ranges::VinylNoiseSkw }
+    { Param::ID::Drive,            Param::Name::Drive,     "", 1.f, 1.f, 10.f, 0.1f, 1.f }, // Drive taken from MyFirstRealTimeAudioApp
+    { Param::ID::PitchWobbleIntensity, Param::Name::PitchWobbleIntensity, "%", Param::Ranges::PitchWobbleIntensityMin, /*default val*/ Param::Ranges::PitchWobbleIntensityMin, Param::Ranges::PitchWobbleIntensityMax, Param::Ranges::PitchWobbleIntensityInc, Param::Ranges::PitchWobbleIntensitySkw },
+    { Param::ID::BitDepth,         Param::Name::BitDepth,     "bits", 16.f, 1.f, 24.f, 1.f, 1.f }, // 1-24 bits, default 16.
+    { Param::ID::RateReduce,       Param::Name::RateReduce,     "x", 1.f, 1.f, 64.f, 1.f, 2.f }, // 1x to 64x downsampling factor, default 1.
+    { Param::ID::FlangerIntensity, Param::Name::FlangerIntensity, "%", 0.0f, Param::Ranges::FlangerIntensityMin, Param::Ranges::FlangerIntensityMax, Param::Ranges::FlangerIntensityInc, Param::Ranges::FlangerIntensitySkw },
+    { Param::ID::PostGain,         Param::Name::PostGain,  "dB", 0.0f, -60.f, 12.f, 0.1f, 3.8018f },
+    { Param::ID::TremoloEnabled,   Param::Name::TremoloEnabled, Param::Ranges::EnabledOff, Param::Ranges::EnabledOn, true },
+    { Param::ID::TremoloRate,      Param::Name::TremoloRate, "Hz", 1.0f, Param::Ranges::TremoloRateMin, Param::Ranges::TremoloRateMax, Param::Ranges::TremoloRateInc, Param::Ranges::TremoloRateSkw },
+    { Param::ID::TremoloDepth,     Param::Name::TremoloDepth, "%", 0.0f, Param::Ranges::TremoloDepthMin, Param::Ranges::TremoloDepthMax, Param::Ranges::TremoloDepthInc, Param::Ranges::TremoloDepthSkw },
+    { Param::ID::VinylNoise,       Param::Name::VinylNoise, "%", 0.0f, Param::Ranges::VinylNoiseMin, Param::Ranges::VinylNoiseMax, Param::Ranges::VinylNoiseInc, Param::Ranges::VinylNoiseSkw }
 };
 
 MainProcessor::MainProcessor() :
@@ -47,13 +36,6 @@ MainProcessor::MainProcessor() :
     vinylNoiseLevel(0.0f) // <<< NEW: Initialize vinylNoiseLevel
 
 {
-    // parameterManager.registerParameterCallback(Param::ID::Enabled,
-    // [this](float newValue, bool force)
-    // {
-    //     enabled = newValue > 0.5f;
-    //     enableRamp.setTarget(enabled ? 1.f : 0.f, force);
-    // });
-
     parameterManager.registerParameterCallback(Param::ID::Drive,
     [this] (float value, bool /*forced*/)
     {
@@ -104,31 +86,7 @@ MainProcessor::MainProcessor() :
 
     });
 
-    // parameterManager.registerParameterCallback(Param::ID::Offset,
-    // [this] (float newValue, bool /*force*/)
-    // {
-    //     flanger.setOffset(newValue);
-    // });
-
-    // parameterManager.registerParameterCallback(Param::ID::Depth,
-    // [this](float newValue, bool /*force*/)
-    // {
-    //     flanger.setDepth(newValue);
-    // });
-
-    // parameterManager.registerParameterCallback(Param::ID::Rate,
-    // [this] (float newValue, bool /*force*/)
-    // {
-    //     flanger.setModulationRate(newValue);
-    // });
-
-    // parameterManager.registerParameterCallback(Param::ID::ModType,
-    // [this](float newValue, bool /*force*/)
-    // {
-    //     DSP::Flanger::ModulationType modType = static_cast<DSP::Flanger::ModulationType>(std::round(newValue));
-    //     flanger.setModulationType(std::min(std::max(modType, DSP::Flanger::Sin), DSP::Flanger::Tri));
-    // });
-     parameterManager.registerParameterCallback(Param::ID::FlangerIntensity,
+    parameterManager.registerParameterCallback(Param::ID::FlangerIntensity,
     [this](float newValue, bool /*force*/)
     {
         // newValue is typically 0-100 from the parameter definition. Convert to 0.0-1.0.
@@ -148,7 +106,6 @@ MainProcessor::MainProcessor() :
         float currentDepth = intensity * flangerMaxDepthMs; 
         // If you want a minimum depth even at low intensity (but > 0), you could do:
         // float currentDepth = (intensity == 0.0f) ? 0.0f : juce::jmap(intensity, flangerMinDepthMs, flangerMaxDepthMs);
-
 
         // Rate: linear mapping
         float currentRate = juce::jmap(intensity, flangerMinRateHz, flangerMaxRateHz);
@@ -276,9 +233,6 @@ void MainProcessor::prepareToPlay(double newSampleRate, int samplesPerBlock)
     // Flanger
     flanger.prepare(newSampleRate, MaxDelaySizeMs, numChannels);
     enableRamp.prepare(newSampleRate, true, enabled ? 1.f : 0.f);
-    //filter.prepare({ newSampleRate, static_cast<juce::uint32>(samplesPerBlock), numChannels });
-    //flanger.prepare(newSampleRate, MaxDelaySizeMs, numChannels);
-    //enableRamp.prepare(newSampleRate, true, enabled ? 1.f : 0.f);
 
     // Post Gain
     outputGain.reset(newSampleRate, 0.01f);
@@ -296,7 +250,6 @@ void MainProcessor::prepareToPlay(double newSampleRate, int samplesPerBlock)
 
     // Prepare LFO output buffer
     tremoloLfoOutputBuffer.setSize(1, samplesPerBlock, false, true, false);
-    // (numChannels=1, numSamples=samplesPerBlock, keepExistingContent=false, clearExtraSpace=true, avoidReallocating=false)
 
     // Vinyl noise
     juce::dsp::ProcessSpec noiseFilterSpec;
@@ -373,7 +326,6 @@ void MainProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBu
     // Drive (via filter)
     {
         juce::dsp::AudioBlock<float> audioBlock(buffer);
-        //juce::dsp::AudioBlock<float> audioBlock(buffer.getArrayOfWritePointers(), buffer.getNumChannels(), buffer.getNumSamples());
         juce::dsp::ProcessContextReplacing<float> ctx(audioBlock);
         filter.process(ctx);
     }

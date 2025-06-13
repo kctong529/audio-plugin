@@ -7,9 +7,7 @@
 namespace Param
 {
     namespace ID
-    {   // Enable entire effect
-        //static const juce::String Enabled { "enabled" };
-
+    {
         // Drive/distortion params
         static const juce::String Drive { "drive" };
 
@@ -52,10 +50,6 @@ namespace Param
         static const juce::String BitDepth { "Bit Depth" };
         static const juce::String RateReduce { "Rate Reduce" };
 
-        // static const juce::String Offset { "Offset" };
-        // static const juce::String Depth { "Depth" };
-        // static const juce::String Rate { "Rate" };
-        // static const juce::String ModType { "Mod. Type" };
         const juce::String FlangerIntensity { "Flanger Mix" }; // Or "Flanger Amount", "Flanger Intensity"
         
         static const juce::String PostGain { "Post-Gain" };
