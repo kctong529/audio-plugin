@@ -13,6 +13,10 @@ namespace Param
         // Drive/distortion params
         static const juce::String Drive { "drive" };
 
+        // Pitch wobble params
+        static const juce::String PitchWobbleIntensity { "pitch_wobble_intensity" }; // <<< NEW ID
+
+
         // Bitcrusher params
         static const juce::String BitDepth { "bit_depth" };
         static const juce::String RateReduce { "rate_reduce" };
@@ -42,6 +46,8 @@ namespace Param
         //static const juce::String Enabled { "Enabled" };
 
         static const juce::String Drive { "Drive" };
+
+        static const juce::String PitchWobbleIntensity { "Wobble" }; // <<< NEW Name (or "Pitch Wobble")
     
         static const juce::String BitDepth { "Bit Depth" };
         static const juce::String RateReduce { "Rate Reduce" };
@@ -63,23 +69,10 @@ namespace Param
 
     namespace Ranges
     {
-    // {
-    //     static constexpr float OffsetMin { 0.f };
-    //     static constexpr float OffsetMax { 10.f };
-    //     static constexpr float OffsetInc { 0.01f };
-    //     static constexpr float OffsetSkw { 0.5f };
-
-    //     static constexpr float DepthMin { 0.f };
-    //     static constexpr float DepthMax { 10.f };
-    //     static constexpr float DepthInc { 0.01f };
-    //     static constexpr float DepthSkw { 0.5f };
-
-    //     static constexpr float RateMin { 0.1f };
-    //     static constexpr float RateMax { 5.f };
-    //     static constexpr float RateInc { 0.01f };
-    //     static constexpr float RateSkw { 0.5f };
-
-    //     static const juce::StringArray ModLabels { "Sine", "Triangle" };
+        static constexpr float PitchWobbleIntensityMin   = 0.0f;   // 0%
+        static constexpr float PitchWobbleIntensityMax   = 100.0f; // 100%
+        static constexpr float PitchWobbleIntensityInc   = 1.0f;
+        static constexpr float PitchWobbleIntensitySkw   = 1.0f;   // Linear
 
         static const float FlangerIntensityMin = 0.0f;  // 0%
         static const float FlangerIntensityMax = 100.0f; // 100%
@@ -173,6 +166,16 @@ private:
     juce::Random randomGenerator; // For generating noise
     juce::dsp::StateVariableFilter::Filter<float> noiseFilter; // For shaping the noise
     float vinylNoiseLevel { 0.0f }; // 0.0 to 1.0
+
+    juce::dsp::Oscillator<float> pitchWobbleLFO;
+    std::vector<juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear>> pitchWobbleDelayLines;
+    float currentPitchWobbleIntensity { 0.0f }; // Internal state, 0.0 to 1.0
+
+    static constexpr float PITCH_WOBBLE_CENTRAL_DELAY_MS { 15.0f }; // Base delay around which to modulate
+    static constexpr float PITCH_WOBBLE_MAX_MOD_DEPTH_MS { 3.0f };  // Max delay swing (in ms) from central point at 100% intensity
+    static constexpr float PITCH_WOBBLE_MIN_RATE_HZ      { 0.25f }; // LFO rate when intensity is just above 0
+    static constexpr float PITCH_WOBBLE_MAX_RATE_HZ      { 1.8f };  // LFO rate at 100% intensity
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainProcessor)
 };
