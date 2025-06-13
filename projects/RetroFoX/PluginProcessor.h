@@ -106,9 +106,6 @@ namespace Param
         static constexpr float VinylNoiseInc = 1.0f;
         static constexpr float VinylNoiseSkw = 1.0f;      // Linear
     }
-
-
-    
 }
 
 class MainProcessor : public juce::AudioProcessor
